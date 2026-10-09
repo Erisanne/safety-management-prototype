@@ -169,7 +169,7 @@
     }
     .sub .back { font-size: 22px; line-height: 1; margin-right: 10px; color: var(--ink); }
 
-    /* ===== 待办 / 已办、未读 / 已读：纯文字页签 ===== */
+    /* ===== 待办 / 已办：纯文字页签 ===== */
     .tabs {
       height: 42px;
       background: #fff;
@@ -197,9 +197,6 @@
       left: 0; right: 0; bottom: 0;
     }
     .tabs b { font-weight: 700; margin-left: 1px; }
-    .readall { margin-left: auto; align-self: center; color: var(--b); font-size: 11px; }
-    #msgTabs { padding: 0 16px; }
-
     /* ===== 二层：业务类型筛选 ===== */
     .types {
       height: 39px;
@@ -248,10 +245,6 @@
     }
     .item footer span:last-child { color: var(--b); }
 
-    /* ===== 消息 ===== */
-    .msg.read .dot { background: #cbd2dc; }
-    .empty { padding: 45px; text-align: center; color: var(--muted); font-size: 13px; }
-
     /* ===== 我的 ===== */
     .profile {
       padding: 20px;
@@ -272,7 +265,7 @@
 
     /* ===== 底部导航 ===== */
     .nav { height: 70px; flex: none; background: #fff; border-top: 1px solid var(--line); display: flex; }
-    .nav button { width: 25%; position: relative; color: #9ca7b8; font-size: 11px; padding-top: 8px; }
+    .nav button { flex: 1; position: relative; color: #9ca7b8; font-size: 11px; padding-top: 8px; }
     .nav .on { color: var(--b); }
     .nav i[class^="ri-"] { display: block; font-size: 22px; line-height: 24px; margin-bottom: 2px; }
     .badge {
@@ -379,13 +372,6 @@
             </div>
           </div>
 
-          <div class="section">
-            <div class="head">
-              <b>未读消息</b>
-              <button class="link" onclick="go('messages')">查看全部　›</button>
-            </div>
-            <div class="card" id="homeMsgs"></div>
-          </div>
         </div>
       </section>
       <!-- ============ 待办 ============ -->
@@ -512,21 +498,6 @@
         </div>
       </section>
 
-      <!-- ============ 消息 ============ -->
-      <section id="messages" class="page">
-        <div class="sub">
-          <button class="back" onclick="go('home')"><i class="ri-arrow-left-s-line"></i></button>消息
-        </div>
-        <nav class="tabs" id="msgTabs">
-          <span class="on" data-msg="unread">未读 <b id="uc">3</b></span>
-          <span data-msg="read">已读</span>
-          <button class="readall" onclick="readAll()">一键已读</button>
-        </nav>
-        <div class="pad">
-          <div class="card"><div id="msgList"></div></div>
-        </div>
-      </section>
-
       <!-- ============ 我的 ============ -->
       <section id="profile" class="page">
         <div class="sub">
@@ -546,23 +517,13 @@
     <nav class="nav">
       <button class="on" data-p="home" onclick="go('home')"><i class="ri-home-5-line"></i>首页</button>
       <button data-p="todo" onclick="go('todo')"><i class="ri-list-check-2"></i>待办<i class="badge">14</i></button>
-      <button data-p="messages" onclick="go('messages')"><i class="ri-chat-3-line"></i>消息<i class="badge" id="mb">3</i></button>
       <button data-p="profile" onclick="go('profile')"><i class="ri-user-3-line"></i>我的</button>
     </nav>
   </main>
 
   <div id="toast" class="toast"></div>
   <script>
-    var stage = "pending", type = "all", msgMode = "unread";
-
-    /* 模拟消息数据：覆盖隐患、整改、巡检、作业的主要触发场景 */
-    var messages = [
-      { id: 0, t: "您有一个待派单隐患，请尽快处理。", m: "隐患管理 · 09:52", read: false },
-      { id: 1, t: "您有一个待验收的整改单，请尽快处理。", m: "整改管理 · 09:42", read: false },
-      { id: 2, t: "巡检任务已发放，请尽快处理。", m: "巡检管理 · 昨日 17:10", read: false },
-      { id: 3, t: "您有一个待审批的作业票，请尽快处理。", m: "作业管理 · 周一", read: true },
-      { id: 4, t: "您的气体检测快到期，请处理。", m: "作业管理 · 周一", read: true }
-    ];
+    var stage = "pending", type = "all";
 
     function go(p) {
       document.querySelectorAll(".page").forEach(function (x) {
@@ -602,58 +563,6 @@
       };
     });
 
-    /* ---------- 消息：未读 / 已读 + 一键已读 ---------- */
-    function renderMsgs() {
-      var rows = messages.filter(function (x) {
-        return msgMode === "unread" ? !x.read : x.read;
-      });
-      document.getElementById("msgList").innerHTML = rows.length
-        ? rows.map(function (x) {
-            return '<button class="row msg' + (x.read ? " read" : "") +
-              '" onclick="markRead(' + x.id + ')"><i class="dot"></i>' +
-              '<div class="rowmain"><b>' + x.t + '</b><small>' + x.m +
-              '</small></div><span class="arrow">›</span></button>';
-          }).join("")
-        : '<div class="empty">全部已读</div>';
-
-      var unread = messages.filter(function (x) { return !x.read; });
-      document.getElementById("homeMsgs").innerHTML = unread.length
-        ? unread.slice(0, 3).map(function (x) {
-            return '<button class="row"><i class="dot"></i><div class="rowmain"><b>' +
-              x.t + '</b><small>' + x.m + '</small></div></button>';
-          }).join("")
-        : '<div class="empty">全部已读</div>';
-
-      document.getElementById("uc").textContent = unread.length;
-      var mb = document.getElementById("mb");
-      mb.textContent = unread.length;
-      mb.style.display = unread.length ? "block" : "none";
-    }
-    document.querySelectorAll("#msgTabs span").forEach(function (x) {
-      x.onclick = function () {
-        document.querySelectorAll("#msgTabs span").forEach(function (y) {
-          y.classList.remove("on");
-        });
-        x.classList.add("on");
-        msgMode = x.dataset.msg;
-        renderMsgs();
-      };
-    });
-    function markRead(id) {
-      messages.forEach(function (x) {
-        if (x.id === id) x.read = true;
-      });
-      renderMsgs();
-      toast("消息已标记为已读");
-    }
-    function readAll() {
-      var unread = messages.filter(function (x) { return !x.read; }).length;
-      if (!unread) { toast("全部已读"); return; }
-      messages.forEach(function (x) { x.read = true; });
-      renderMsgs();
-      toast("当前消息已全部读完");
-    }
-
     /* ---------- 首页轮播（对应后台可编辑的轮播位） ---------- */
     var slides = [
       ["让每一次作业都安全", "风险可见 · 责任到人 · 闭环管理", "今日安全运行中"],
@@ -681,7 +590,6 @@
     }
 
     renderTodo();
-    renderMsgs();
   </script>
 </body>
 </html>
