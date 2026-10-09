@@ -211,6 +211,33 @@
     .types span { white-space: nowrap; color: var(--muted); font-size: 12px; cursor: pointer; }
     .types span.on { color: var(--b); font-weight: 700; }
 
+    /* ===== 待办搜索 ===== */
+    .subact { margin-left: auto; font-size: 18px; color: #7d899b; }
+    .searchbar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 8px 16px;
+    }
+    .searchbar.on { display: flex; }
+    .searchbar i { color: #a4aebd; font-size: 16px; }
+    .searchbar input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .searchbar input::placeholder { color: #a9b2c0; }
+    .searchbar .cancel { color: var(--b); font-size: 12px; }
+    .empty { display: none; padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+    .listnote { display: none; margin: 4px 16px 10px; color: #a0aabc; font-size: 11px; line-height: 1.6; }
+
     /* ===== 待办卡片 ===== */
     .groups { padding-bottom: 8px; }
     .group { margin: 14px 16px; }
@@ -378,6 +405,12 @@
       <section id="todo" class="page">
         <div class="sub">
           <button class="back" onclick="go('home')"><i class="ri-arrow-left-s-line"></i></button>我的待办
+          <button class="subact" onclick="toggleSearch()" aria-label="搜索待办"><i class="ri-search-line"></i></button>
+        </div>
+        <div class="searchbar" id="searchbar">
+          <i class="ri-search-line"></i>
+          <input id="todoSearch" type="search" placeholder="搜索单号或事项名称" oninput="renderTodo()" />
+          <button class="cancel" onclick="clearSearch()">取消</button>
         </div>
         <nav class="tabs" id="todoTabs">
           <span class="on" data-stage="pending">待办 <b>14</b></span>
@@ -495,6 +528,8 @@
               <footer><span>领取 → 执行 → 提交</span><span>查看流程　›</span></footer>
             </article>
           </section>
+          <div class="empty" id="todoEmpty">未找到相关单据</div>
+          <div class="listnote" id="doneNote">已办默认展示近 6 个月的单据，每次加载 20 条，继续上滑加载更多。</div>
         </div>
       </section>
 
@@ -537,10 +572,41 @@
 
     /* ---------- 待办：一层（待办 / 已办）+ 二层（业务类型） ---------- */
     function renderTodo() {
+      var input = document.getElementById("todoSearch");
+      var keyword = input ? input.value.trim().toLowerCase() : "";
+      var visible = 0;
       document.querySelectorAll(".group").forEach(function (g) {
-        var hit = g.classList.contains(stage) && (type === "all" || g.dataset.type === type);
-        g.style.display = hit ? "block" : "none";
+        var byStage = g.classList.contains(stage);
+        var byType = type === "all" || g.dataset.type === type;
+        if (!byStage || !byType) {
+          g.style.display = "none";
+          return;
+        }
+        var groupHits = 0;
+        g.querySelectorAll(".item").forEach(function (item) {
+          var hit = !keyword || item.textContent.toLowerCase().indexOf(keyword) >= 0;
+          item.style.display = hit ? "block" : "none";
+          if (hit) groupHits = groupHits + 1;
+        });
+        g.style.display = groupHits ? "block" : "none";
+        visible += groupHits;
       });
+      document.getElementById("todoEmpty").style.display = visible ? "none" : "block";
+      document.getElementById("doneNote").style.display = stage === "done" && !keyword ? "block" : "none";
+    }
+    function toggleSearch() {
+      var bar = document.getElementById("searchbar");
+      bar.classList.toggle("on");
+      if (bar.classList.contains("on")) {
+        document.getElementById("todoSearch").focus();
+      } else {
+        clearSearch();
+      }
+    }
+    function clearSearch() {
+      document.getElementById("todoSearch").value = "";
+      document.getElementById("searchbar").classList.remove("on");
+      renderTodo();
     }
     document.querySelectorAll("#todoTabs span").forEach(function (x) {
       x.onclick = function () {
