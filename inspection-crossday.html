@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>巡检计划 · 跨天任务时间</title>
+<style>
+  :root{
+    --line:#e5e6eb; --head:#f5f7fa; --text:#1d2129; --sub:#86909c;
+    --ph:#c9cdd4; --field:#f7f8fa; --brand:#165dff; --danger:#f53f3f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:32px 40px 56px; background:#fff; color:var(--text);
+    font:14px/1.7 "Microsoft YaHei","PingFang SC",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1{font-size:18px;font-weight:600;margin:0 0 8px}
+  .lede{color:var(--sub);margin:0 0 28px}
+  .card{border:1px solid var(--line);border-radius:6px;padding:20px 24px 24px;margin:0 0 24px;max-width:900px}
+  .card > h2{font-size:15px;font-weight:600;margin:0 0 4px}
+  .card > .hint{color:var(--sub);font-size:13px;margin:0 0 18px}
+
+  /* ---------- 配置表单：还原截图 2 ---------- */
+  .form-row{display:flex;align-items:center;gap:56px;flex-wrap:wrap;margin:0 0 16px}
+  .field{display:flex;align-items:center;gap:10px}
+  .label{white-space:nowrap}
+  .req{color:var(--danger);margin-right:2px}
+  .time-field{position:relative;display:inline-flex;align-items:center}
+  .time-field .clock{position:absolute;left:10px;width:15px;height:15px;color:var(--ph);pointer-events:none}
+  input[type="time"]{
+    width:190px; height:36px; padding:0 12px 0 32px;
+    border:1px solid var(--line); border-radius:4px; background:var(--field);
+    color:var(--text); font:14px/1 inherit; outline:none;
+  }
+  input[type="time"]:focus{border-color:var(--brand);background:#fff}
+  input[type="number"]{
+    width:120px;height:36px;padding:0 12px;border:1px solid var(--line);
+    border-radius:4px;background:var(--field);font:14px/1 inherit;outline:none;
+  }
+  .switch{display:inline-flex;align-items:center;gap:8px;color:var(--sub);font-size:13px}
+
+  /* ---------- 任务时间表格：还原截图 1 ---------- */
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{border:1px solid var(--line);padding:12px 16px;text-align:left}
+  th{background:var(--head);font-weight:600}
+  td .nextday{color:var(--sub);font-size:13px}
+
+  .rule{margin:14px 0 0;padding:12px 16px;border-radius:4px;background:var(--head);color:var(--sub);font-size:13px}
+  .rule b{color:var(--text);font-weight:600}
+  .bad{color:var(--sub);text-decoration:line-through}
+</style>
+</head>
+<body>
+
+<h1>巡检计划 · 跨天任务时间原型稿</h1>
+<p class="lede">用于确认「每 2 小时一次、23:00–次日 01:00」这类跨零点巡检计划在配置和任务列表上的呈现方式。</p>
+
+<section class="card">
+  <h2>计划配置</h2>
+  <p class="hint">结束时间不晚于开始时间时，按「次日」计算，并允许结束时间取到 00:00–23:59 的任意值。</p>
+
+  <div class="form-row">
+    <div class="field">
+      <span class="label"><i class="req">*</i>开始时间</span>
+      <span class="time-field">
+        <svg class="clock" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="8" cy="8" r="6.2"></circle><path d="M8 4.6V8l2.4 1.6"></path>
+        </svg>
+        <input type="time" step="1" value="23:00:00" id="startTime">
+      </span>
+    </div>
+    <div class="field">
+      <span class="label"><i class="req">*</i>结束时间</span>
+      <span class="time-field">
+        <svg class="clock" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="8" cy="8" r="6.2"></circle><path d="M8 4.6V8l2.4 1.6"></path>
+        </svg>
+        <input type="time" step="1" value="01:00:00" id="endTime">
+      </span>
+    </div>
+    <div class="field">
+      <span class="label">巡检间隔</span>
+      <input type="number" min="1" max="24" value="2" id="interval"> <span>小时</span>
+    </div>
+  </div>
+  <div class="form-row">
+    <span class="switch" id="crossHint"></span>
+  </div>
+</section>
+
+<section class="card">
+  <h2>任务列表 · 任务时间</h2>
+  <p class="hint">跨天任务归属「计划开始日」，时间显示补「(次日)」。</p>
+  <table>
+    <thead>
+      <tr><th style="width:180px">巡检日期</th><th>任务时间</th></tr>
+    </thead>
+    <tbody id="taskRows"></tbody>
+  </table>
+  <p class="rule">
+    <b>生成规则</b>：结束时间 ≤ 开始时间时按次日计算；窗口长度 ÷ 间隔 = 任务数，最后一次任务取窗口结束点。<br>
+    <span class="bad">现状：开始 00:00:00 / 结束 23:59:59 → 任务时间只能显示为 2026-09-22 23:00-23:59，次日 01:00 无任务，执行人被判超时。</span>
+  </p>
+</section>
+
+<script>
+const fmtHM = m => String(Math.floor((((m % 1440) + 1440) % 1440) / 60)).padStart(2, '0') + ':' +
+                  String((((m % 60) + 60) % 60)).padStart(2, '0');
+const fmtDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const toMin = v => { const p = v.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+
+function render() {
+  const startV = document.getElementById('startTime').value || '00:00:00';
+  const endV   = document.getElementById('endTime').value   || '23:59:59';
+  const step   = Math.max(1, Number(document.getElementById('interval').value || 2)) * 60;
+
+  const startM = toMin(startV);
+  let endM = toMin(endV);
+  const crossDay = endM <= startM;           // 结束时间不晚于开始时间 → 次日
+  if (crossDay) endM += 1440;
+
+  const spanMin = endM - startM;
+  const count = spanMin <= 0 ? 0 : Math.max(1, Math.round(spanMin / step));
+
+  document.getElementById('crossHint').textContent = crossDay
+    ? `已按跨天窗口识别：${fmtHM(startM)} → 次日 ${fmtHM(endM)}，共生成 ${count} 个任务/天`
+    : `同日窗口：${fmtHM(startM)} → ${fmtHM(endM)}，共生成 ${count} 个任务/天`;
+
+  const rows = [];
+  for (let d = 0; d < 3; d++) {
+    const base = new Date(2026, 8, 22 + d);
+    const dateText = fmtDate(base);
+    for (let i = 0; i < count; i++) {
+      const s = startM + i * step;
+      const e = Math.min(s + step, endM);
+      const nextDay = e > 1440;
+      rows.push('<tr><td>' + dateText + '</td><td>' + dateText + ' ' + fmtHM(s) + '-' + fmtHM(e) +
+                (nextDay ? '<span class="nextday">(次日)</span>' : '') + '</td></tr>');
+    }
+  }
+  document.getElementById('taskRows').innerHTML = rows.join('');
+}
+
+['startTime', 'endTime', 'interval'].forEach(id =>
+  document.getElementById(id).addEventListener('input', render));
+render();
+</script>
+
+</body>
+</html>

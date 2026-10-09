@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>安全作业 · 移动工作台</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+  <style>
+    :root {
+      --b: #1464dc;
+      --red: #eb4d55;
+      --ink: #17233b;
+      --muted: #7d899b;
+      --bg: #f5f7fb;
+      --line: #e8edf3;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body {
+      background: #e9eef6;
+      font-family: "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+    }
+    button { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+
+    /* ===== 手机容器：滚动发生在页面内部 ===== */
+    .app {
+      height: 100vh;
+      max-width: 430px;
+      margin: auto;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .top {
+      height: 64px;
+      flex: none;
+      background: linear-gradient(135deg, #145fd8, #3977f2);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 700; }
+    .logo {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: #fff; color: var(--b);
+      display: grid; place-items: center;
+      font-style: normal; font-size: 16px;
+    }
+    .avatar {
+      width: 32px; height: 32px;
+      border: 2px solid #fff; border-radius: 50%;
+      color: #fff; font-size: 13px;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 16px;
+    }
+    .page { display: none; }
+    .page.on { display: block; }
+    .pad { padding: 14px 16px; }
+
+    /* ===== 首页 ===== */
+    .hero {
+      position: relative;
+      height: 139px;
+      border-radius: 14px;
+      background: linear-gradient(115deg, #125bd0, #3479fa);
+      color: #fff;
+      padding: 21px;
+      overflow: hidden;
+    }
+    .hero h1 { font-size: 22px; margin: 0 0 8px; }
+    .hero p { font-size: 12px; opacity: 0.83; margin: 0; }
+    .hero span {
+      display: inline-block;
+      font-size: 11px;
+      margin-top: 20px;
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: #ffffff26;
+    }
+    .dots { position: absolute; right: 18px; bottom: 14px; display: flex; gap: 5px; }
+    .dots i { width: 5px; height: 5px; border-radius: 50%; background: #ffffff73; }
+    .dots i.on { width: 16px; border-radius: 3px; background: #fff; }
+
+    .section { margin-top: 18px; }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .head b { font-size: 17px; }
+    .link { color: var(--b); font-size: 12px; }
+
+    .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .appx {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 2px;
+      font-size: 12px;
+      text-align: center;
+    }
+    .ico {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      margin: auto auto 7px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--b);
+      font-size: 18px;
+    }
+    .appx:nth-child(2) .ico { background: #ed8a3d; }
+    .appx:nth-child(3) .ico { background: #25ae83; }
+    .appx:nth-child(4) .ico { background: #7567dd; }
+    .appx small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+
+    .card {
+      background: #fff;
+      border-radius: 13px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px #315b9910;
+    }
+    .sum { padding: 14px; border-bottom: 1px solid var(--line); }
+    .sum strong { font-size: 28px; color: var(--b); }
+    .sum span { font-size: 12px; color: var(--muted); margin-left: 7px; }
+
+    .row {
+      display: flex;
+      gap: 9px;
+      padding: 13px 14px;
+      border-bottom: 1px solid #f0f2f6;
+      width: 100%;
+      text-align: left;
+    }
+    .row:last-child { border: 0; }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      margin-top: 5px;
+      flex: none;
+    }
+    .rowmain { flex: 1; min-width: 0; }
+    .row b { font-size: 13px; line-height: 1.45; }
+    .row small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .arrow { color: #a4aebd; }
+
+    /* ===== 二级页头 ===== */
+    .sub {
+      height: 56px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-weight: 700;
+    }
+    .sub .back { font-size: 22px; line-height: 1; margin-right: 10px; color: var(--ink); }
+
+    /* ===== 待办 / 已办、未读 / 已读：纯文字页签 ===== */
+    .tabs {
+      height: 42px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: flex-end;
+      padding: 0 22px;
+      gap: 34px;
+    }
+    .tabs span {
+      position: relative;
+      padding: 0 0 9px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 22px;
+      cursor: pointer;
+    }
+    .tabs span.on { color: var(--b); font-weight: 700; }
+    .tabs span.on:after {
+      content: "";
+      position: absolute;
+      height: 2px;
+      background: var(--b);
+      border-radius: 2px;
+      left: 0; right: 0; bottom: 0;
+    }
+    .tabs b { font-weight: 700; margin-left: 1px; }
+    .readall { margin-left: auto; align-self: center; color: var(--b); font-size: 11px; }
+    #msgTabs { padding: 0 16px; }
+
+    /* ===== 二层：业务类型筛选 ===== */
+    .types {
+      height: 39px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 23px;
+      padding: 0 22px;
+      overflow-x: auto;
+    }
+    .types span { white-space: nowrap; color: var(--muted); font-size: 12px; cursor: pointer; }
+    .types span.on { color: var(--b); font-weight: 700; }
+
+    /* ===== 待办卡片 ===== */
+    .groups { padding-bottom: 8px; }
+    .group { margin: 14px 16px; }
+    .group h3 { font-size: 14px; margin: 0 0 8px; }
+    .item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 13px 14px;
+      margin-bottom: 8px;
+    }
+    .line { display: flex; justify-content: space-between; gap: 8px; }
+    .line b { font-size: 13px; line-height: 1.45; }
+    .tag {
+      white-space: nowrap;
+      height: 20px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: #fff0e5;
+      color: #da7138;
+      font-size: 10px;
+    }
+    .done .tag { background: #eaf8f2; color: #218c6f; }
+    .meta { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .item footer {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #f0f2f6;
+      margin-top: 8px;
+      padding-top: 8px;
+      color: #9ca7b8;
+      font-size: 10px;
+    }
+    .item footer span:last-child { color: var(--b); }
+
+    /* ===== 消息 ===== */
+    .msg.read .dot { background: #cbd2dc; }
+    .empty { padding: 45px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* ===== 我的 ===== */
+    .profile {
+      padding: 20px;
+      background: linear-gradient(135deg, #145fd8, #3977f2);
+      color: #fff;
+    }
+    .profile b { font-size: 16px; }
+    .profile small { display: block; opacity: 0.78; margin-top: 6px; font-size: 12px; }
+    .plist { background: #fff; margin-top: 14px; }
+    .plist div {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .plist span:last-child { color: var(--muted); }
+
+    /* ===== 底部导航 ===== */
+    .nav { height: 70px; flex: none; background: #fff; border-top: 1px solid var(--line); display: flex; }
+    .nav button { width: 25%; position: relative; color: #9ca7b8; font-size: 11px; padding-top: 8px; }
+    .nav .on { color: var(--b); }
+    .nav i[class^="ri-"] { display: block; font-size: 22px; line-height: 24px; margin-bottom: 2px; }
+    .badge {
+      position: absolute;
+      top: 4px;
+      right: 24%;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      background: var(--red);
+      color: #fff;
+      font-size: 9px;
+      font-style: normal;
+      line-height: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #192235;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: none;
+      z-index: 20;
+    }
+
+    @media (min-width: 600px) {
+      body { padding: 24px 0; }
+      .app {
+        height: 760px;
+        max-height: calc(100vh - 48px);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 14px 50px #315b9933;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div class="brand"><i class="logo">安</i>安全作业</div>
+      <button class="avatar" onclick="go('profile')">林</button>
+    </header>
+
+    <div class="scroll">
+      <!-- ============ 首页 ============ -->
+      <section id="home" class="page on">
+        <div class="pad">
+          <div class="hero">
+            <h1 id="heroTitle">让每一次作业都安全</h1>
+            <p id="heroDesc">风险可见 · 责任到人 · 闭环管理</p>
+            <span id="heroTag">今日安全运行中</span>
+            <div class="dots" id="heroDots"><i class="on"></i><i></i><i></i></div>
+          </div>
+
+          <div class="section">
+            <div class="head"><b>应用</b></div>
+            <div class="apps">
+              <button class="appx" onclick="toast('进入隐患管理')"><div class="ico">!</div>隐患<small>1 条待派单</small></button>
+              <button class="appx" onclick="toast('进入整改管理')"><div class="ico">✓</div>整改<small>2 条待处理</small></button>
+              <button class="appx" onclick="toast('进入巡检管理')"><div class="ico">⌕</div>巡检<small>3 项待执行</small></button>
+              <button class="appx" onclick="toast('进入作业管理')"><div class="ico">⚒</div>作业<small>8 张待办理</small></button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="head">
+              <b>最新待办</b>
+              <button class="link" onclick="go('todo')">全部 14 项　›</button>
+            </div>
+            <div class="card">
+              <div class="sum"><strong>14</strong><span>项待处理</span></div>
+              <button class="row" onclick="go('todo')">
+                <i class="dot"></i>
+                <div class="rowmain">
+                  <b>待我验收 · 机房配电柜防护缺失</b>
+                  <small>整改管理 · 提交验收 2 小时前</small>
+                </div>
+                <span class="arrow">›</span>
+              </button>
+              <button class="row" onclick="go('todo')">
+                <i class="dot"></i>
+                <div class="rowmain">
+                  <b>消防设施专项巡检</b>
+                  <small>巡检管理 · 计划 10:00 开始</small>
+                </div>
+                <span class="arrow">›</span>
+              </button>
+              <button class="row" onclick="go('todo')">
+                <i class="dot"></i>
+                <div class="rowmain">
+                  <b>有限空间作业 · 待气体检测</b>
+                  <small>作业管理 · 检测有效期 2 小时</small>
+                </div>
+                <span class="arrow">›</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="head">
+              <b>未读消息</b>
+              <button class="link" onclick="go('messages')">查看全部　›</button>
+            </div>
+            <div class="card" id="homeMsgs"></div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ 待办 ============ -->
+      <section id="todo" class="page">
+        <div class="sub">
+          <button class="back" onclick="go('home')"><i class="ri-arrow-left-s-line"></i></button>我的待办
+        </div>
+        <nav class="tabs" id="todoTabs">
+          <span class="on" data-stage="pending">待办 <b>14</b></span>
+          <span data-stage="done">已办 <b>6</b></span>
+        </nav>
+        <nav class="types" id="typeTabs">
+          <span class="on" data-type="all">全部</span>
+          <span data-type="hazard">隐患整改</span>
+          <span data-type="work">作业</span>
+          <span data-type="inspect">巡检</span>
+        </nav>
+
+        <div class="groups" id="groups">
+          <!-- 待办 · 隐患整改 -->
+          <section class="group pending" data-type="hazard">
+            <h3>隐患整改</h3>
+            <article class="item">
+              <div class="line"><b>待我派单 · 危险化学品库通风设备异常</b><span class="tag">待派单</span></div>
+              <div class="meta">HZ-20260921-018　提交人：王工</div>
+              <footer><span>截止今天 18:00</span><span>进入详情　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>待我整改 · 消防通道堆放包装材料</b><span class="tag">待接单</span></div>
+              <div class="meta">ZG-20260920-006　责任部门：仓储部</div>
+              <footer><span>整改期限 09-23</span><span>进入详情　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>待我验收 · 机房配电柜防护缺失</b><span class="tag">待验收</span></div>
+              <div class="meta">ZG-20260919-011　整改执行人：陈强</div>
+              <footer><span>提交验收 2 小时前</span><span>进入详情　›</span></footer>
+            </article>
+          </section>
+
+          <!-- 待办 · 作业 -->
+          <section class="group pending" data-type="work">
+            <h3>作业</h3>
+            <article class="item">
+              <div class="line"><b>一级动火作业票 · 罐区管线维修</b><span class="tag">待办理</span></div>
+              <div class="meta">ZYP-20260921-008　当前节点：安全负责人</div>
+              <footer><span>申请人：李伟</span><span>办理审批　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>有限空间作业 · 污水池清淤</b><span class="tag">待气体检测</span></div>
+              <div class="meta">ZYP-20260921-009　检测位置：污水处理站</div>
+              <footer><span>检测有效期 2 小时</span><span>开始检测　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>高处作业 · 厂房屋面检修</b><span class="tag">待我作业</span></div>
+              <div class="meta">ZYP-20260920-021　作业人员：林安全等 3 人</div>
+              <footer><span>有效期至 18:00</span><span>进入作业　›</span></footer>
+            </article>
+          </section>
+
+          <!-- 待办 · 巡检 -->
+          <section class="group pending" data-type="inspect">
+            <h3>巡检</h3>
+            <article class="item">
+              <div class="line"><b>动力站房月度巡检</b><span class="tag">待领取</span></div>
+              <div class="meta">XJ-0921-A　可领取范围：安全管理部</div>
+              <footer><span>计划开始 10:00</span><span>领取任务　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>消防设施专项巡检</b><span class="tag">待巡检</span></div>
+              <div class="meta">XJ-20260921-032　巡检点 18 个</div>
+              <footer><span>允许提前 30 分钟</span><span>开始巡检　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>危化品库巡检转办任务</b><span class="tag">待巡检</span></div>
+              <div class="meta">XJ-20260921-036　原巡检人：赵明</div>
+              <footer><span>结束时间 16:30</span><span>执行任务　›</span></footer>
+            </article>
+          </section>
+
+          <!-- 已办 · 隐患整改 -->
+          <section class="group done" data-type="hazard">
+            <h3>隐患整改 · 已办</h3>
+            <article class="item">
+              <div class="line"><b>消防通道占用整改验收</b><span class="tag">已验收</span></div>
+              <div class="meta">ZG-20260918-004　完成：09-20 16:20</div>
+              <footer><span>派单 → 整改 → 验收</span><span>查看流程　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>配电室绝缘垫老化更换</b><span class="tag">已闭环</span></div>
+              <div class="meta">ZG-20260915-002　完成：09-18 09:40</div>
+              <footer><span>派单 → 整改 → 验收</span><span>查看流程　›</span></footer>
+            </article>
+          </section>
+
+          <!-- 已办 · 作业 -->
+          <section class="group done" data-type="work">
+            <h3>作业 · 已办</h3>
+            <article class="item">
+              <div class="line"><b>临时用电作业票</b><span class="tag">已审批</span></div>
+              <div class="meta">ZYP-20260919-003　完成：09-19 11:20</div>
+              <footer><span>申请 → 审批 → 归档</span><span>查看流程　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>动火作业票 · 备件库焊接</b><span class="tag">已归档</span></div>
+              <div class="meta">ZYP-20260916-012　完成：09-16 17:05</div>
+              <footer><span>申请 → 审批 → 气体检测 → 归档</span><span>查看流程　›</span></footer>
+            </article>
+          </section>
+
+          <!-- 已办 · 巡检 -->
+          <section class="group done" data-type="inspect">
+            <h3>巡检 · 已办</h3>
+            <article class="item">
+              <div class="line"><b>消防泵房巡检</b><span class="tag">已完成</span></div>
+              <div class="meta">XJ-20260920-014　完成：09-20 16:40</div>
+              <footer><span>领取 → 执行 → 提交</span><span>查看流程　›</span></footer>
+            </article>
+            <article class="item">
+              <div class="line"><b>罐区日常巡检</b><span class="tag">已完成</span></div>
+              <div class="meta">XJ-20260919-008　完成：09-19 15:10</div>
+              <footer><span>领取 → 执行 → 提交</span><span>查看流程　›</span></footer>
+            </article>
+          </section>
+        </div>
+      </section>
+
+      <!-- ============ 消息 ============ -->
+      <section id="messages" class="page">
+        <div class="sub">
+          <button class="back" onclick="go('home')"><i class="ri-arrow-left-s-line"></i></button>消息
+        </div>
+        <nav class="tabs" id="msgTabs">
+          <span class="on" data-msg="unread">未读 <b id="uc">3</b></span>
+          <span data-msg="read">已读</span>
+          <button class="readall" onclick="readAll()">一键已读</button>
+        </nav>
+        <div class="pad">
+          <div class="card"><div id="msgList"></div></div>
+        </div>
+      </section>
+
+      <!-- ============ 我的 ============ -->
+      <section id="profile" class="page">
+        <div class="sub">
+          <button class="back" onclick="go('home')"><i class="ri-arrow-left-s-line"></i></button>我的
+        </div>
+        <div class="profile">
+          <b>林安全</b><small>安全管理部 · 安全员</small>
+        </div>
+        <div class="plist">
+          <div><span>所属组织</span><span>海南航天</span></div>
+          <div><span>手机号</span><span>138****0587</span></div>
+          <div><span>当前版本</span><span>v1.0.0（原型）</span></div>
+        </div>
+      </section>
+    </div>
+
+    <nav class="nav">
+      <button class="on" data-p="home" onclick="go('home')"><i class="ri-home-5-line"></i>首页</button>
+      <button data-p="todo" onclick="go('todo')"><i class="ri-list-check-2"></i>待办<i class="badge">14</i></button>
+      <button data-p="messages" onclick="go('messages')"><i class="ri-chat-3-line"></i>消息<i class="badge" id="mb">3</i></button>
+      <button data-p="profile" onclick="go('profile')"><i class="ri-user-3-line"></i>我的</button>
+    </nav>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script>
+    var stage = "pending", type = "all", msgMode = "unread";
+
+    /* 模拟消息数据：覆盖隐患、整改、巡检、作业的主要触发场景 */
+    var messages = [
+      { id: 0, t: "您有一个待派单隐患，请尽快处理。", m: "隐患管理 · 09:52", read: false },
+      { id: 1, t: "您有一个待验收的整改单，请尽快处理。", m: "整改管理 · 09:42", read: false },
+      { id: 2, t: "巡检任务已发放，请尽快处理。", m: "巡检管理 · 昨日 17:10", read: false },
+      { id: 3, t: "您有一个待审批的作业票，请尽快处理。", m: "作业管理 · 周一", read: true },
+      { id: 4, t: "您的气体检测快到期，请处理。", m: "作业管理 · 周一", read: true }
+    ];
+
+    function go(p) {
+      document.querySelectorAll(".page").forEach(function (x) {
+        x.classList.toggle("on", x.id === p);
+      });
+      document.querySelectorAll(".nav button").forEach(function (x) {
+        x.classList.toggle("on", x.dataset.p === p);
+      });
+      document.querySelector(".scroll").scrollTop = 0;
+    }
+
+    /* ---------- 待办：一层（待办 / 已办）+ 二层（业务类型） ---------- */
+    function renderTodo() {
+      document.querySelectorAll(".group").forEach(function (g) {
+        var hit = g.classList.contains(stage) && (type === "all" || g.dataset.type === type);
+        g.style.display = hit ? "block" : "none";
+      });
+    }
+    document.querySelectorAll("#todoTabs span").forEach(function (x) {
+      x.onclick = function () {
+        document.querySelectorAll("#todoTabs span").forEach(function (y) {
+          y.classList.remove("on");
+        });
+        x.classList.add("on");
+        stage = x.dataset.stage;
+        renderTodo();
+      };
+    });
+    document.querySelectorAll("#typeTabs span").forEach(function (x) {
+      x.onclick = function () {
+        document.querySelectorAll("#typeTabs span").forEach(function (y) {
+          y.classList.remove("on");
+        });
+        x.classList.add("on");
+        type = x.dataset.type;
+        renderTodo();
+      };
+    });
+
+    /* ---------- 消息：未读 / 已读 + 一键已读 ---------- */
+    function renderMsgs() {
+      var rows = messages.filter(function (x) {
+        return msgMode === "unread" ? !x.read : x.read;
+      });
+      document.getElementById("msgList").innerHTML = rows.length
+        ? rows.map(function (x) {
+            return '<button class="row msg' + (x.read ? " read" : "") +
+              '" onclick="markRead(' + x.id + ')"><i class="dot"></i>' +
+              '<div class="rowmain"><b>' + x.t + '</b><small>' + x.m +
+              '</small></div><span class="arrow">›</span></button>';
+          }).join("")
+        : '<div class="empty">全部已读</div>';
+
+      var unread = messages.filter(function (x) { return !x.read; });
+      document.getElementById("homeMsgs").innerHTML = unread.length
+        ? unread.slice(0, 3).map(function (x) {
+            return '<button class="row"><i class="dot"></i><div class="rowmain"><b>' +
+              x.t + '</b><small>' + x.m + '</small></div></button>';
+          }).join("")
+        : '<div class="empty">全部已读</div>';
+
+      document.getElementById("uc").textContent = unread.length;
+      var mb = document.getElementById("mb");
+      mb.textContent = unread.length;
+      mb.style.display = unread.length ? "block" : "none";
+    }
+    document.querySelectorAll("#msgTabs span").forEach(function (x) {
+      x.onclick = function () {
+        document.querySelectorAll("#msgTabs span").forEach(function (y) {
+          y.classList.remove("on");
+        });
+        x.classList.add("on");
+        msgMode = x.dataset.msg;
+        renderMsgs();
+      };
+    });
+    function markRead(id) {
+      messages.forEach(function (x) {
+        if (x.id === id) x.read = true;
+      });
+      renderMsgs();
+      toast("消息已标记为已读");
+    }
+    function readAll() {
+      var unread = messages.filter(function (x) { return !x.read; }).length;
+      if (!unread) { toast("全部已读"); return; }
+      messages.forEach(function (x) { x.read = true; });
+      renderMsgs();
+      toast("当前消息已全部读完");
+    }
+
+    /* ---------- 首页轮播（对应后台可编辑的轮播位） ---------- */
+    var slides = [
+      ["让每一次作业都安全", "风险可见 · 责任到人 · 闭环管理", "今日安全运行中"],
+      ["隐患早发现 · 整改有闭环", "把风险控制在事故之前", "在办隐患整改 3 项"],
+      ["规范现场作业 · 守住安全底线", "作业票、气体检测、监护全流程留痕", "在办作业票 8 张"]
+    ];
+    var si = 0;
+    setInterval(function () {
+      si = (si + 1) % slides.length;
+      document.getElementById("heroTitle").textContent = slides[si][0];
+      document.getElementById("heroDesc").textContent = slides[si][1];
+      document.getElementById("heroTag").textContent = slides[si][2];
+      var dots = document.querySelectorAll("#heroDots i");
+      for (var i = 0; i < dots.length; i++) {
+        dots[i].classList.toggle("on", i === si);
+      }
+    }, 4000);
+
+    function toast(t) {
+      var e = document.getElementById("toast");
+      e.textContent = t;
+      e.style.display = "block";
+      clearTimeout(e._timer);
+      e._timer = setTimeout(function () { e.style.display = "none"; }, 1500);
+    }
+
+    renderTodo();
+    renderMsgs();
+  </script>
+</body>
+</html>
