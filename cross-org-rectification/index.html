@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>集团/事业部整改派发 · Web 原型</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","Microsoft YaHei",Arial,sans-serif;background:#f0f2f5;color:#303133;font-size:13px}
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:206px;flex:0 0 206px;background:#fff;border-right:1px solid #e8eaf0;position:sticky;top:0;height:100vh;overflow:auto}
+  .logo{height:56px;display:flex;align-items:center;padding:0 16px;font-weight:700;font-size:17px;color:#2b6cff;border-bottom:1px solid #f2f3f5}
+  .menu{padding:6px 0}
+  .menu .item{display:flex;align-items:center;justify-content:space-between;height:40px;padding:0 14px;color:#4a4a4a;cursor:pointer}
+  .menu .item:hover{background:#f7f9fc}
+  .menu .item.active{background:#eaf1ff;color:#2b6cff;font-weight:600;box-shadow:inset 2px 0 0 #2b6cff}
+  .menu .sub .item{padding-left:34px;height:38px}
+  .caret{font-size:10px;color:#a8adb8}
+  .badge{background:#fff1f0;color:#cf1322;border-radius:9px;padding:0 6px;font-size:11px;line-height:16px}
+  .badge.zero{display:none}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:56px;background:#fff;border-bottom:1px solid #e8eaf0;display:flex;align-items:center;gap:14px;padding:0 18px;position:sticky;top:0;z-index:20}
+  .crumb{color:#8a8f99}.crumb b{color:#303133}
+  .grow{flex:1}
+  .orgpick{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid #dcdfe6;border-radius:4px;background:#fff}
+  .orgpick select{border:0;outline:0;background:transparent;font-size:13px;cursor:pointer}
+  .iconbtn{padding:4px 8px;border-radius:4px;color:#606266;cursor:pointer;font-size:12px}
+  .iconbtn:hover{background:#f2f3f5}
+  .user{display:flex;align-items:center;gap:8px;padding-left:8px;border-left:1px solid #eef0f3}
+  .avatar{width:26px;height:26px;border-radius:50%;background:#eaf1ff;color:#2b6cff;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .content{padding:14px 18px 40px;flex:1;min-width:0}
+  .banner{background:#fffbe6;border:1px solid #ffe58f;color:#8a6d3b;padding:7px 12px;border-radius:4px;margin-bottom:10px}
+  .pagebar{display:flex;align-items:center;gap:12px;margin-bottom:2px}
+  .pagebar h2{font-size:16px;margin:0;font-weight:600}
+  .filterbar{display:flex;align-items:center;flex-wrap:wrap;gap:16px;padding:10px 0 12px;border-bottom:1px solid #eef0f3;margin-bottom:12px}
+  .seg{display:inline-flex;border:1px solid #dcdfe6;border-radius:4px;overflow:hidden}
+  .seg button{border:0;background:#fff;padding:5px 12px;cursor:pointer;color:#606266;font-size:13px}
+  .seg button.on{background:#f2f4f8;color:#1f2d3d;font-weight:600}
+  .vline{width:1px;height:16px;background:#e0e3e9}
+  .sit{cursor:pointer;color:#606266;font-size:14px}
+  .sit b{font-weight:600;margin-left:5px;color:#1f2d3d}
+  .sit.on{color:#2b6cff;font-weight:600}
+  .sit.on b{color:#2b6cff}
+  .sit.zero{opacity:.45}
+  .card{background:#fff;border:1px solid #eef0f3;border-radius:4px;padding:14px 16px;margin-bottom:12px}
+  .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .btn{border:1px solid #dcdfe6;background:#fff;color:#303133;border-radius:4px;height:30px;padding:0 12px;cursor:pointer;font-size:13px}
+  .btn:hover{border-color:#b9d0ff;color:#2b6cff}
+  .btn.primary{background:#eaf1ff;border-color:#b9d0ff;color:#2b6cff;font-weight:600}
+  .btn.solid{background:#2b6cff;border-color:#2b6cff;color:#fff}
+  .btn.solid:hover{background:#1f5ded;color:#fff}
+  .btn.ghost{border-color:transparent;background:transparent;color:#606266}
+  .btn.demo{color:#8a8f99;border-style:dashed}
+  .input,select.input{border:1px solid #dcdfe6;border-radius:4px;height:30px;padding:0 8px;font-size:13px;background:#fff;outline:0;min-width:110px}
+  .input:focus{border-color:#2b6cff}
+  .input[readonly]{background:#f7f9fc;color:#606266}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid #f0f2f5;padding:9px 10px;text-align:left;vertical-align:middle;white-space:nowrap}
+  thead th{background:#fafbfc;color:#606266;font-weight:600}
+  tbody tr:hover{background:#f7faff}
+  .link{color:#2b6cff;cursor:pointer}
+  .muted{color:#8a8f99}
+  .ellip{max-width:200px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+  .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;line-height:18px}
+  .tag.gray{background:#f2f3f5;color:#7a7f87}
+  .tag.orange{background:#fff4e6;color:#d46b08}
+  .tag.purple{background:#f3ecff;color:#6b3fd4}
+  .tag.blue{background:#eaf1ff;color:#2b6cff}
+  .tag.cyan{background:#e6f7ff;color:#08979c}
+  .tag.green{background:#e8f7ec;color:#1f9c4d}
+  .tag.red{background:#fff1f0;color:#cf1322}
+  .pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding-top:12px;color:#606266}
+  .detail-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .detail-head h2{margin:0;font-size:16px}
+  .nodehint{background:#f5f9ff;border:1px solid #d6e4ff;color:#2b6cff;border-radius:4px;padding:8px 12px;margin-bottom:12px}
+  .sec{border:1px solid #eef0f3;border-radius:4px;margin-bottom:12px;overflow:hidden;background:#fff}
+  .sec>summary{list-style:none;cursor:pointer;padding:11px 14px;font-weight:600;background:#fafbfc;display:flex;align-items:center;justify-content:space-between}
+  .sec>summary::-webkit-details-marker{display:none}
+  .sec .body{padding:14px}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 18px}
+  .grid .f{display:flex;gap:8px}
+  .grid .f .k{color:#8a8f99;flex:0 0 88px;text-align:right}
+  .grid .f .v{color:#303133;word-break:break-all}
+  .field-note{background:#f7f9fc;border-radius:4px;padding:10px 12px;color:#606266;line-height:1.7;white-space:pre-wrap}
+  .steps{display:flex;flex-wrap:wrap;gap:10px}
+  .step{flex:1 1 170px;border:1px solid #eef0f3;border-radius:4px;padding:10px 12px;background:#fff}
+  .step .node{font-weight:600;margin-bottom:4px}
+  .step .who{color:#8a8f99;font-size:12px}
+  .step .cmt{margin-top:6px;font-size:12px;color:#4a4a4a;background:#f7f9fc;border-radius:4px;padding:6px 8px}
+  .step.done{border-color:#d6efdc;background:#f6fdf8}.step.done .node{color:#1f9c4d}
+  .step.current{border-color:#b9d0ff;background:#f5f9ff}.step.current .node{color:#2b6cff}
+  .step.wait{opacity:.6}
+  .timeline{position:relative;padding-left:20px}
+  .timeline:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:#e8eaf0}
+  .tl{position:relative;margin-bottom:14px}
+  .tl:before{content:"";position:absolute;left:-18px;top:5px;width:9px;height:9px;border-radius:50%;background:#2b6cff}
+  .tl.ok:before{background:#1f9c4d}.tl.no:before{background:#d4380d}
+  .tl .h{font-weight:600}
+  .tl .m{color:#8a8f99;font-size:12px;margin-top:3px}
+  .tl .c{margin-top:6px;background:#f7f9fc;border-radius:4px;padding:8px 10px;color:#4a4a4a;white-space:pre-wrap}
+  .att{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+  .att .item{width:150px}
+  .att .ph{position:relative;width:150px;height:96px;border-radius:4px;overflow:hidden;border:1px solid #eef0f3;background:#eef2f8}
+  .att .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .att .ph.vid:after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;background:rgba(0,0,0,.2);text-shadow:0 1px 4px rgba(0,0,0,.6)}
+  .att .cap{font-size:12px;color:#8a8f99;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kbody{color:#8a8f99;margin:0 0 6px}
+  .accept-card{background:#f6fdf8;border:1px solid #d6efdc;border-radius:4px;padding:12px 14px;margin-bottom:12px}
+  .accept-card.no{background:#fffbf5;border-color:#ffe1b8}
+  .fpline{display:flex;gap:20px;flex-wrap:wrap;color:#4a4a4a;margin-bottom:6px}
+  .fpline b{color:#1f2d3d}
+  .fpbar{position:sticky;bottom:0;background:#fff;border-top:1px solid #eef0f3;padding:12px 0 0;display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50}
+  .mask.show{display:block}
+  .modal{position:fixed;z-index:60;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:640px;max-width:94vw;display:none;overflow:hidden}
+  .modal.show{display:block}
+  .modal .mh{padding:14px 18px;border-bottom:1px solid #f0f2f5;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .modal .mb{padding:16px 18px;max-height:66vh;overflow:auto}
+  .modal .mf{padding:12px 18px;border-top:1px solid #f0f2f5;display:flex;justify-content:flex-end;gap:8px}
+  .formrow{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+  .formrow .k{flex:0 0 96px;text-align:right;color:#606266;padding-top:6px}
+  .formrow .k i{color:#f5222d;font-style:normal;margin-right:2px}
+  .formrow .w{flex:1;min-width:0}
+  .formrow .w .input,.formrow .w select,.formrow .w textarea{width:100%}
+  textarea.input{height:auto;padding:8px;min-height:70px;resize:vertical;font-family:inherit}
+  .hint{color:#8a8f99;font-size:12px;margin-top:4px}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 22px}
+  .subT{font-weight:600;margin:2px 0 12px;padding-left:8px;border-left:3px solid #2b6cff}
+  .up{border:1px dashed #dcdfe6;border-radius:4px;padding:14px;text-align:center;color:#8a8f99;background:#fbfcfd;cursor:pointer}
+  .up:hover{border-color:#2b6cff;color:#2b6cff}
+  .radio{display:inline-flex;align-items:center;gap:6px;margin-right:16px;cursor:pointer}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:40px;background:rgba(0,0,0,.8);color:#fff;padding:9px 16px;border-radius:4px;z-index:80;display:none}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">九丰SAFE-LINK系统</div>
+    <nav class="menu">
+      <div class="item"><span>首页</span></div>
+      <div class="item"><span>重大危险源管理</span><span class="caret">v</span></div>
+      <div class="item"><span>安全基础信息</span><span class="caret">v</span></div>
+      <div class="item"><span>双重预防</span><span class="caret">v</span></div>
+      <div class="item"><span>风险分级管控</span><span class="caret">v</span></div>
+      <div class="item"><span>隐患治理</span><span class="caret">v</span></div>
+      <div class="sub">
+        <div class="item"><span>隐患单</span></div>
+        <div class="item active" id="menuZgd"><span>整改单</span></div>
+        <div class="item" id="menuAppr"><span>待我审批</span><span class="badge" id="apprBadge">0</span></div>
+      </div>
+      <div class="item"><span>消息提醒</span></div>
+      <div class="item"><span>安全检查</span><span class="caret">v</span></div>
+      <div class="item"><span>风险地图</span></div>
+      <div class="item"><span>专项检查</span></div>
+      <div class="item"><span>停用/检修</span></div>
+      <div class="item"><span>专项检查隐患</span></div>
+    </nav>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb">首页 / <b id="crumb">整改单</b></div>
+      <div class="grow"></div>
+      <div class="orgpick"><span class="muted">当前组织</span><select id="orgSel"></select></div>
+      <div class="iconbtn">帮助</div>
+      <div class="iconbtn">锁定</div>
+      <div class="iconbtn">全屏</div>
+      <div class="user"><span class="avatar">李</span><span>李凡浩</span></div>
+    </header>
+    <div class="content">
+      <section id="viewList">
+        <div class="banner">原型演示 · 数据为模拟数据，仅用于确认交互与字段，不构成正式业务结论。</div>
+        <div class="pagebar"><h2>整改单</h2><span class="muted" id="scopeTip"></span></div>
+        <div class="filterbar">
+          <span class="seg">
+            <button id="sgOut">我派发的</button>
+            <button id="sgIn" class="on">我收到的</button>
+          </span>
+          <span class="vline"></span>
+          <span id="statusItems"></span>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <button class="btn primary" id="btnNew">新增</button>
+            <button class="btn" id="btnImport">导入</button>
+            <button class="btn" id="btnBatch">批量派发</button>
+            <button class="btn" id="btnOrderSel">派单</button>
+            <button class="btn" id="btnRecallSel">收回</button>
+            <button class="btn" id="btnCloseSel">关闭</button>
+            <span class="grow"></span>
+            <input class="input" id="kw" placeholder="关键字：整改单编号/风险对象/分析单元">
+            <button class="btn solid" id="btnQuery">查询</button>
+            <button class="btn" id="btnReset">重置</button>
+          </div>
+          <div style="overflow:auto">
+            <table>
+              <thead><tr>
+                <th style="width:34px"><input type="checkbox" id="ckAll"></th>
+                <th style="width:50px">序号</th><th>整改单编号</th><th>状态</th><th>渠道分类</th>
+                <th>派发方</th><th>责任公司</th><th>关联单号</th><th>风险对象</th>
+                <th>整改部门</th><th>当前处理人</th><th>整改期限</th><th style="width:130px">操作</th>
+              </tr></thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span class="muted" id="sumTip">共 0 条</span>
+            <button class="btn ghost" disabled>上一页</button><span class="tag blue">1</span><button class="btn ghost" disabled>下一页</button>
+          </div>
+        </div>
+      </section>
+      <section id="viewAppr" hidden>
+        <div class="pagebar"><h2>待我审批</h2><span class="muted" id="apprTip"></span></div>
+        <div class="card">
+          <div style="overflow:auto">
+            <table>
+              <thead><tr>
+                <th style="width:50px">序号</th><th>整改单编号</th><th>状态</th><th>当前验收节点</th><th>验收人/审批人</th>
+                <th>派发方</th><th>责任公司</th><th>隐患描述</th><th>整改提交时间</th><th>整改期限</th><th style="width:120px">操作</th>
+              </tr></thead>
+              <tbody id="apprBody"></tbody>
+            </table>
+          </div>
+          <div class="pager"><span class="muted" id="apprSum">共 0 条</span></div>
+        </div>
+      </section>
+      <section id="viewDetail" hidden>
+        <div class="detail-head">
+          <button class="btn" id="btnBack">返回</button>
+          <h2 id="dTitle">整改单</h2><span id="dStatus"></span>
+          <span class="grow"></span><span id="actionBar"></span>
+        </div>
+        <div class="nodehint" id="nodeHint"></div>
+        <details class="sec" open><summary>整改单基础信息 <span class="caret">v</span></summary>
+          <div class="body">
+            <div class="grid" id="dBase"></div>
+            <div class="kbody" style="margin-top:14px">现场照片 / 现场视频</div>
+            <div class="att" id="dScene"></div>
+          </div>
+        </details>
+        <details class="sec" open><summary>派发信息（跨组织） <span class="caret">v</span></summary>
+          <div class="body"><div class="grid" id="dDispatch"></div></div>
+        </details>
+        <details class="sec" open><summary>隐患描述与整改要求 <span class="caret">v</span></summary>
+          <div class="body" id="dReq"></div>
+        </details>
+        <details class="sec" open><summary>整改执行 <span class="caret">v</span></summary>
+          <div class="body">
+            <div class="grid" id="dExec"></div>
+            <div class="kbody" style="margin-top:14px">整改后照片 / 整改后视频</div>
+            <div class="att" id="dAfter"></div>
+          </div>
+        </details>
+        <details class="sec" open><summary>验收意见（最新验收结果） <span class="caret">v</span></summary>
+          <div class="body">
+            <div id="dAccept"></div>
+            <div class="kbody">验收流程</div>
+            <div class="steps" id="dSteps"></div>
+          </div>
+        </details>
+        <details class="sec" open><summary>流转记录（倒序，含驳回后重新提交） <span class="caret">v</span></summary>
+          <div class="body"><div class="timeline" id="dTimeline"></div></div>
+        </details>
+        <details class="sec"><summary>执行情况 <span class="caret">v</span></summary>
+          <div class="body muted">沿用现有执行情况时间线：配置 → 整改照片 → 验收完成。</div></details>
+        <details class="sec"><summary>系统信息 <span class="caret">v</span></summary>
+          <div class="body muted">创建人 / 创建时间 / 租户 / 单据版本</div></details>
+        <details class="sec"><summary>操作信息 <span class="caret">v</span></summary>
+          <div class="body muted">最近操作人 / 操作时间</div></details>
+      </section>
+      <section id="viewNew" hidden>
+        <div class="detail-head">
+          <button class="btn" id="btnNewBack">返回</button>
+          <h2>新增整改（＝新增派发）</h2>
+          <span class="grow"></span>
+          <button class="btn" id="btnNewCancel">取消</button>
+          <button class="btn solid" id="btnNewSave">提交派发</button>
+        </div>
+        <details class="sec" open><summary>整改单基础信息 <span class="caret">v</span></summary>
+          <div class="body">
+            <div class="cols3">
+              <div class="formrow"><div class="k"><i>*</i>责任公司</div><div class="w"><select class="input" id="fTo"></select><div class="hint">仅可选当前组织的下级组织</div></div></div>
+              <div class="formrow"><div class="k">渠道分类</div><div class="w"><select class="input" id="fChannel"><option>安全检查</option><option>手动创建</option></select></div></div>
+              <div class="formrow"><div class="k">来源检查单</div><div class="w"><input class="input" id="fSource" value="AQJC2026101300021"></div></div>
+            </div>
+            <div class="cols3">
+              <div class="formrow"><div class="k"><i>*</i>风险对象</div><div class="w"><input class="input" id="fRisk" value="液氢罐区"></div></div>
+              <div class="formrow"><div class="k">分析单元</div><div class="w"><input class="input" id="fUnit" value="液氢储罐区"></div></div>
+              <div class="formrow"><div class="k">隐患来源</div><div class="w"><select class="input" id="fHsrc"><option>日常排查</option><option>专项检查</option><option>上级检查</option><option>领导现场检查</option></select></div></div>
+            </div>
+            <div class="cols3">
+              <div class="formrow"><div class="k">隐患等级</div><div class="w"><select class="input" id="fLevel"><option>一般</option><option>重大</option></select></div></div>
+              <div class="formrow"><div class="k">紧急程度</div><div class="w"><select class="input" id="fUrgent"><option>紧急</option><option>一般</option><option>不紧急</option></select></div></div>
+              <div class="formrow"><div class="k">隐患类型</div><div class="w"><select class="input" id="fType"><option>设备</option><option>管理</option><option>作业环境</option></select></div></div>
+            </div>
+            <div class="cols3">
+              <div class="formrow"><div class="k">隐患类别</div><div class="w"><select class="input" id="fCat"><option>其他隐患</option><option>设备设施</option></select></div></div>
+              <div class="formrow"><div class="k">隐患治理类型</div><div class="w"><select class="input" id="fGov"><option>限期整改</option><option>立即整改</option></select></div></div>
+              <div class="formrow"><div class="k">级别</div><div class="w"><select class="input" id="fGrade"><option>公司级</option><option>事业部级</option><option>集团级</option></select></div></div>
+            </div>
+            <div class="formrow"><div class="k"><i>*</i>隐患描述</div><div class="w"><textarea class="input" id="fDesc">液氢罐区气体报警器故障，需限期修复并完成复测。</textarea></div></div>
+            <div class="cols2">
+              <div class="formrow"><div class="k">现场照片</div><div class="w"><div class="up">点击上传（模拟）</div></div></div>
+              <div class="formrow"><div class="k">现场视频</div><div class="w"><div class="up">点击上传（模拟，60s 内）</div></div></div>
+            </div>
+          </div>
+        </details>
+        <details class="sec" open><summary>派发信息 <span class="caret">v</span></summary>
+          <div class="body">
+            <div class="cols2">
+              <div class="formrow"><div class="k"><i>*</i>整改要求</div><div class="w"><textarea class="input" id="fReq">限期修复气体报警器故障，并完成复测。</textarea></div></div>
+              <div class="formrow"><div class="k"><i>*</i>整改期限</div><div class="w"><input class="input" id="fDeadline" value="2026-10-20 18:00:00"></div></div>
+            </div>
+            <div class="cols2">
+              <div class="formrow"><div class="k"><i>*</i>验收人 A</div><div class="w"><select class="input" id="fChecker"><option>李凡浩</option><option>王敏</option><option>张亮</option><option>方明明</option></select><div class="hint">第一验收节点，派发时指定</div></div></div>
+              <div class="formrow"><div class="k">登记人 / 时间</div><div class="w"><input class="input" id="fReg" readonly></div></div>
+            </div>
+            <div class="hint">整改部门与整改部门负责人由责任公司安环部接收后指派；也可由安环直接指派整改人。</div>
+          </div>
+        </details>
+        <div class="fpbar">
+          <button class="btn" id="btnNewCancel2">取消</button>
+          <button class="btn solid" id="btnNewSave2">提交派发</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="mask" id="mask"></div>
+<div class="modal" id="mReceive">
+  <div class="mh"><span>接收并指派整改部门</span><span class="link" data-close>X</span></div>
+  <div class="mb">
+    <div class="formrow"><div class="k">来源信息</div><div class="w"><div class="field-note" id="rcSource"></div></div></div>
+    <div class="formrow"><div class="k"><i>*</i>整改部门</div><div class="w"><select class="input" id="rcDept"><option>安环部</option><option>设备部</option><option>技术设备部</option><option>生产部</option></select></div></div>
+    <div class="formrow"><div class="k">部门负责人</div><div class="w"><input class="input" id="rcHead" value="江凯旋"></div></div>
+    <div class="formrow"><div class="k">接收人</div><div class="w"><input class="input" value="江凯旋（安环部）" readonly></div></div>
+  </div>
+  <div class="mf"><button class="btn" data-close>取消</button><button class="btn" id="mReceiveAssignTo">直接指派整改人</button><button class="btn solid" id="mReceiveOk">接收并指派部门</button></div>
+</div>
+<div class="modal" id="mOrder">
+  <div class="mh"><span>整改派单</span><span class="link" data-close>X</span></div>
+  <div class="mb">
+    <div class="formrow"><div class="k">来源信息</div><div class="w"><div class="field-note" id="orSource"></div></div></div>
+    <div class="formrow"><div class="k"><i>*</i>整改人</div><div class="w"><select class="input" id="orUser"><option>张亮</option><option>赵岩</option><option>王海</option><option>孙倩</option></select></div></div>
+    <div class="formrow"><div class="k"><i>*</i>整改期限</div><div class="w"><input class="input" id="orDeadline"></div></div>
+    <div class="formrow"><div class="k"><i>*</i>验收人</div><div class="w"><select class="input" id="orChecker"><option>李凡浩</option><option>王敏</option><option>张亮</option><option>方明明</option></select><div class="hint">默认带出派发时指定的验收人 A，可调整</div></div></div>
+    <div class="formrow"><div class="k"><i>*</i>整改要求</div><div class="w"><textarea class="input" id="orReq"></textarea></div></div>
+  </div>
+  <div class="mf"><button class="btn" data-close>取消</button><button class="btn solid" id="mOrderOk">确定</button></div>
+</div>
+<div class="modal" id="mExec">
+  <div class="mh"><span>提交验收</span><span class="link" data-close>X</span></div>
+  <div class="mb">
+    <div class="formrow"><div class="k"><i>*</i>整改结果描述</div><div class="w"><textarea class="input" id="exResult">已完成整改，设备运行正常。</textarea></div></div>
+    <div class="formrow"><div class="k">整改后照片</div><div class="w"><div class="up">点击上传（模拟）</div></div></div>
+    <div class="formrow"><div class="k">整改后视频</div><div class="w"><div class="up">点击上传（模拟，60s 内）</div></div></div>
+  </div>
+  <div class="mf"><button class="btn" data-close>取消</button><button class="btn solid" id="mExecOk">提交验收</button></div>
+</div>
+<div class="modal" id="mApprove">
+  <div class="mh"><span id="apTitle">验收</span><span class="link" data-close>X</span></div>
+  <div class="mb">
+    <div class="formrow"><div class="k">当前节点</div><div class="w" style="padding-top:6px"><b id="aNode">—</b></div></div>
+    <div class="formrow"><div class="k">验收结果</div><div class="w" style="padding-top:6px">
+      <label class="radio"><input type="radio" name="ar" value="pass" checked> 通过</label>
+      <label class="radio"><input type="radio" name="ar" value="reject"> 不通过（驳回）</label>
+    </div></div>
+    <div class="formrow" id="rejectBox" style="display:none"><div class="k">驳回目标</div><div class="w">
+      <select class="input" id="aTarget"><option value="initiator">驳回到发起（整改驳回，退回整改执行人）</option><option value="node">驳回到已流转节点（验收驳回）</option></select>
+      <div class="hint">驳回后处理人修改可再次提交，重新进入验收流程</div>
+    </div></div>
+    <div class="formrow" id="rejectNodeBox" style="display:none"><div class="k"><i>*</i>驳回节点</div><div class="w">
+      <select class="input" id="aRejectNode"></select>
+      <div class="hint">仅可退回已流转过的验收节点</div>
+    </div></div>
+    <div class="formrow"><div class="k"><i>*</i>验收意见</div><div class="w"><textarea class="input" id="aComment" placeholder="必填，最终验收通过时回填为整单验收意见"></textarea></div></div>
+    <div class="formrow"><div class="k">验收照片</div><div class="w"><div class="up">点击上传（模拟）</div></div></div>
+    <div class="formrow"><div class="k">验收视频</div><div class="w"><div class="up">点击上传（模拟，60s 内）</div></div></div>
+  </div>
+  <div class="mf"><button class="btn" data-close>取消</button><button class="btn solid" id="mApproveOk">提交</button></div>
+</div>
+<div class="modal" id="mClose">
+  <div class="mh"><span>关闭整改单</span><span class="link" data-close>X</span></div>
+  <div class="mb"><div class="formrow"><div class="k"><i>*</i>关闭原因</div><div class="w"><textarea class="input" id="clReason">重复单据，关闭。</textarea></div></div></div>
+  <div class="mf"><button class="btn" data-close>取消</button><button class="btn solid" id="mCloseOk">确认关闭</button></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var ORGS=["集团安全管控","特气事业部","仓储事业部","海南航天","DME项目"];
+var CUR_USER="李凡浩";
+var DESC={"集团安全管控":["特气事业部","仓储事业部","海南航天","DME项目"],"特气事业部":["海南航天"],"仓储事业部":["DME项目"],"海南航天":[],"DME项目":[]};
+var STATUS={
+  "草稿":{cls:"gray"},
+  "待派单":{cls:"orange"},
+  "待接单":{cls:"purple"},
+  "整改中":{cls:"blue"},
+  "待验收":{cls:"cyan"},
+  "逾期未整改":{cls:"red"},
+  "逾期未验收":{cls:"red"},
+  "逾期完成":{cls:"orange"},
+  "已关闭":{cls:"gray"}
+};
+var SORDER=["草稿","待派单","待接单","整改中","待验收","逾期未整改","逾期未验收","逾期完成","已关闭"];
+var ACCEPT_STATUS=["待验收","逾期未验收"];
+function nodesOf(r){
+  var a=[{label:"验收人 A",who:r.toOrg+" · "+r.checker,person:r.checker},
+         {label:"公司安环部",who:r.toOrg+" · 安环部",person:r.ehsUser||"江凯旋"}];
+  if(r.fromOrg==="集团安全管控"){a.push({label:"上级单位",who:"事业部安全负责人",person:r.buUser||"事业部安全负责人"});}
+  a.push({label:"派发单位",who:r.fromOrg,person:r.grpUser||"李凡浩"});
+  return a;
+}
+function actOf(r){
+  if(r.status==="草稿"){return "创建人（派发方）";}
+  if(r.status==="待派单"){return "责任公司 · 安环部 / 整改部门负责人";}
+  if(r.status==="待接单"){return "整改执行人";}
+  if(r.status==="整改中"){return "整改执行人";}
+  if(r.status==="逾期未整改"){return "整改执行人";}
+  if(ACCEPT_STATUS.indexOf(r.status)>=0){var n=nodesOf(r),c=n[Math.min(r.node,n.length-1)];return c.person+"（"+c.label+"）";}
+  return "—";
+}
+function pic(text,c1,c2){
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="300" height="192"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+    +'<stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient></defs>'
+    +'<rect width="300" height="192" fill="url(#g)"/><circle cx="248" cy="42" r="26" fill="rgba(255,255,255,.25)"/>'
+    +'<rect x="0" y="132" width="300" height="60" fill="rgba(0,0,0,.22)"/>'
+    +'<text x="12" y="166" font-size="16" fill="#fff" font-family="sans-serif">'+text+'</text></svg>';
+  return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+function PH(n,t,c1,c2){return {kind:"img",name:n,cap:t,src:pic(t,c1||"#7fb0ff",c2||"#2b6cff")};}
+function VD(n,t){return {kind:"vid",name:n,cap:t,src:pic("视频 "+t,"#5a6b86","#2f3b52")};}
+function R(o){
+  var d=Object.assign({channel:"安全检查",risk:"—",unit:"—",level:"一般",urgent:"紧急",htype:"设备",hcat:"其他隐患",
+    gov:"限期整改",grade:"公司级",dept:"",deptHead:"",rectifyUser:"",checker:"王敏",creator:"李凡浩",
+    ehsUser:"",grpUser:"",buUser:"",
+    billNo:"",orderNo:"",acceptNo:"",related:"—",source:"安全检查 · 2026-10-13 集团季度检查",
+    node:0,overdue:false,acceptTime:"",orderTime:"",receiveTime:"",execTime:"",closeTime:"",dispatchTime:"",
+    result:"",desc:"",req:"",opinion:"",commentUser:"",flow:[],yjList:[],
+    scene:[],videos:[],after:[],afterVideo:[],accept:{}},o);
+  d.scene=d.scene.length?d.scene:[PH(d.code+"_01.jpg","现场照片 1","#8fb8ff","#2b6cff"),PH(d.code+"_02.jpg","现场照片 2","#a7c6ff","#4a86e8")];
+  d.videos=d.videos.length?d.videos:[VD(d.code+"_01.mp4","现场视频")];
+  if(d.execTime&&!d.after.length){d.after=[PH(d.code+"_after.jpg","整改后照片 1","#9fe0b5","#1f9c4d")];}
+  if(d.execTime&&!d.afterVideo.length){d.afterVideo=[VD(d.code+"_after.mp4","整改后视频")];}
+  if(d.accept&&d.accept.time&&!d.accept.photos){d.accept.photos=[PH(d.code+"_ys.jpg","验收照片","#ffd7a8","#d48806")];d.accept.videos=[];}
+  return d;
+}
+function T(d,h){return d+" "+h;}
+var RECORDS=[
+R({code:"ZGD20261013001",billNo:"DJZTBG0188",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"液氢储罐区",unit:"液氢储罐区",
+  status:"待派单",dispatchTime:T("2026-10-13","09:12"),deadline:T("2026-10-20","18:00"),checker:"李凡浩",
+  related:"YHD2026101300001",source:"安全检查 · 2026-10-13 集团季度检查",req:"限期修复气体报警器故障，并完成复测。",
+  desc:"液氢储罐区可燃气体报警器显示故障，无法正常报警。"}),
+R({code:"ZGD20261013002",billNo:"DJZTBG0189",fromOrg:"特气事业部",toOrg:"海南航天",risk:"装充区",unit:"充装位",dept:"安环部",deptHead:"江凯旋",
+  status:"待派单",dispatchTime:T("2026-10-12","16:32"),acceptTime:T("2026-10-13","08:40"),deadline:T("2026-10-22","18:00"),
+  checker:"王敏",related:"YHD2026101200007",source:"安全检查 · 2026-10-12 集团领导现场检查",
+  req:"装充位气体报警器故障，需更换并完成复测。",desc:"充装位气体报警器故障，报警不动作。"}),
+R({code:"ZGD20261013003",billNo:"DJZTBG0190",fromOrg:"集团安全管控",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  rectifyUser:"赵岩",status:"待接单",dispatchTime:T("2026-10-11","10:05"),acceptTime:T("2026-10-11","14:20"),orderTime:T("2026-10-11","15:00"),
+  deadline:T("2026-10-19","18:00"),checker:"李凡浩",related:"YHD2026101100003",
+  req:"罐区消防通道被物料占用，需立即清理并保持畅通。",desc:"罐区消防通道被物料占用。"}),
+R({code:"ZGD20261013004",billNo:"DJZTBG0191",fromOrg:"特气事业部",toOrg:"海南航天",risk:"空分装置",unit:"空分装置",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",receiveTime:T("2026-10-10","10:20"),status:"整改中",dispatchTime:T("2026-10-10","09:00"),acceptTime:T("2026-10-10","10:15"),
+  orderTime:T("2026-10-10","10:16"),deadline:T("2026-10-18","18:00"),checker:"王敏",related:"YHD2026101000011",
+  req:"空压机三级进口压力异常，需检修并记录数据。",desc:"空压机三级进口压力超出正常范围。"}),
+R({code:"ZGD20261013005",billNo:"DJZTBG0192",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"液氢罐区",unit:"液氢罐区",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",node:0,status:"待验收",dispatchTime:T("2026-10-09","11:20"),acceptTime:T("2026-10-09","13:05"),orderTime:T("2026-10-09","13:20"),
+  receiveTime:T("2026-10-09","13:40"),execTime:T("2026-10-13","15:40"),deadline:T("2026-10-16","18:00"),checker:"李凡浩",related:"YHD2026100900002",
+  result:"已更换可燃气体检测仪并完成复测，数值正常。",req:"液氢罐区可燃气体检测仪故障，更换后复测。",desc:"液氢罐区可燃气体检测仪无读数。"}),
+R({code:"ZGD20261013006",billNo:"DJZTBG0193",fromOrg:"集团安全管控",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  rectifyUser:"赵岩",node:2,status:"待验收",dispatchTime:T("2026-10-08","09:30"),acceptTime:T("2026-10-08","10:50"),
+  orderTime:T("2026-10-08","11:00"),receiveTime:T("2026-10-08","11:20"),execTime:T("2026-10-12","16:20"),deadline:T("2026-10-15","18:00"),
+  checker:"王敏",related:"YHD2026100800005",result:"已补齐静电接地检测报告，复检合格。",
+  accept:{passed:true,user:"王敏",dept:"DME项目 · 安环部",time:T("2026-10-12","17:00"),comment:"现场核查合格，同意提交上级审批。"},
+  yjList:[{label:"验收人 A",user:"王敏",time:T("2026-10-12","17:00"),passed:true,comment:"现场核查合格，同意提交上级审批。"},
+          {label:"公司安环部",user:"DME项目 · 安环部",time:T("2026-10-13","09:10"),passed:true,comment:"资料齐全，同意。"}],
+  req:"罐区静电接地装置检测报告缺失，需补齐并复检。",desc:"罐区静电接地装置检测报告缺失。"}),
+R({code:"ZGD20261013007",billNo:"DJZTBG0194",fromOrg:"特气事业部",toOrg:"海南航天",risk:"装充区",unit:"充装位",dept:"安环部",deptHead:"江凯旋",
+  rectifyUser:"张亮",status:"已关闭",dispatchTime:T("2026-10-05","09:00"),acceptTime:T("2026-10-05","09:40"),orderTime:T("2026-10-05","09:45"),
+  receiveTime:T("2026-10-05","09:50"),execTime:T("2026-10-07","15:10"),closeTime:T("2026-10-07","17:00"),deadline:T("2026-10-10","18:00"),
+  checker:"李凡浩",related:"YHD2026100500004",result:"已补齐安全标识并验收合格。",
+  accept:{passed:true,user:"李凡浩",dept:"特气事业部 · 安全管控",time:T("2026-10-07","16:30"),comment:"整改到位，验收通过。"},
+  yjList:[{label:"验收人 A",user:"李凡浩",time:T("2026-10-07","16:30"),passed:true,comment:"整改到位，验收通过。"},
+          {label:"派发单位",user:"特气事业部 · 安全管控",time:T("2026-10-07","17:00"),passed:true,comment:"同意闭环。"}],
+  req:"充装位安全标识缺失，需补齐。",desc:"充装位安全标识缺失。"}),
+R({code:"ZGD20261013008",billNo:"DJZTBG0195",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"罐区",unit:"储罐区",
+  status:"已关闭",dispatchTime:T("2026-10-12","17:05"),closeTime:T("2026-10-12","17:30"),deadline:T("2026-10-14","18:00"),checker:"王敏",
+  related:"YHD2026101200009",opinion:"重复单据，关闭。",commentUser:"李凡浩",
+  req:"（重复上报）罐区标识问题，与 ZGD20261013007 重复。",desc:"重复上报。"}),
+R({code:"ZGD20261013009",billNo:"DJZTBG0196",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"液氢罐区",unit:"液氢储罐区",
+  status:"草稿",deadline:T("2026-10-24","18:00"),checker:"王敏",related:"YHD2026101300002",
+  req:"液氢罐区围堰标识老化，需更换。",desc:"液氢罐区围堰标识老化。"}),
+R({code:"ZGD20261013010",billNo:"DJZTBG0197",fromOrg:"仓储事业部",toOrg:"DME项目",risk:"装卸区",unit:"装卸台",dept:"生产部",deptHead:"孙倩",
+  rectifyUser:"孙倩",node:1,status:"待验收",dispatchTime:T("2026-10-07","08:40"),acceptTime:T("2026-10-07","09:20"),
+  orderTime:T("2026-10-07","09:30"),receiveTime:T("2026-10-07","09:40"),execTime:T("2026-10-11","14:10"),deadline:T("2026-10-14","18:00"),
+  checker:"刘强",related:"YHD2026100700006",result:"已更换装卸台防溢流装置。",
+  accept:{passed:true,user:"刘强",dept:"DME项目 · 安环部",time:T("2026-10-11","15:00"),comment:"复测正常，同意。"},
+  yjList:[{label:"验收人 A",user:"刘强",time:T("2026-10-11","15:00"),passed:true,comment:"复测正常，同意。"}],
+  req:"装卸台防溢流装置失效，需更换。",desc:"装卸台防溢流装置失效。"}),
+R({code:"ZGD20261013011",billNo:"DJZTBG0198",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"空分装置",unit:"空分装置",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",node:3,status:"待验收",dispatchTime:T("2026-10-04","10:00"),acceptTime:T("2026-10-04","11:30"),
+  orderTime:T("2026-10-04","11:40"),receiveTime:T("2026-10-04","11:50"),execTime:T("2026-10-10","16:00"),deadline:T("2026-10-12","18:00"),
+  checker:"王敏",related:"YHD2026100400008",result:"已修复空压机压力异常并记录数据。",
+  accept:{passed:true,user:"李凡浩",dept:"集团安全管控",time:T("2026-10-13","10:00"),comment:"同意，符合闭环要求。"},
+  yjList:[{label:"验收人 A",user:"王敏",time:T("2026-10-10","17:00"),passed:true,comment:"检修记录完整，同意。"},
+          {label:"公司安环部",user:"海南航天 · 安环部",time:T("2026-10-11","09:00"),passed:true,comment:"同意上报。"},
+          {label:"上级单位",user:"特气事业部安全负责人",time:T("2026-10-12","10:00"),passed:true,comment:"同意。"}],
+  req:"空压机压力异常，需检修。",desc:"空压机压力异常。"}),
+R({code:"ZGD20261013012",billNo:"DJZTBG0199",fromOrg:"特气事业部",toOrg:"海南航天",risk:"装充区",unit:"充装位",dept:"设备部",deptHead:"王海",
+  rectifyUser:"王海",receiveTime:T("2026-10-12","10:20"),status:"整改中",dispatchTime:T("2026-10-12","09:15"),acceptTime:T("2026-10-12","10:00"),
+  orderTime:T("2026-10-12","10:10"),deadline:T("2026-10-21","18:00"),checker:"李凡浩",related:"YHD2026101200010",
+  req:"充装位静电接地线断裂，需更换。",desc:"充装位静电接地线断裂。"}),
+R({code:"ZGD20261013013",billNo:"DJZTBG0200",fromOrg:"集团安全管控",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  status:"待派单",dispatchTime:T("2026-10-13","08:20"),acceptTime:T("2026-10-13","09:10"),deadline:T("2026-10-23","18:00"),checker:"王敏",
+  related:"YHD2026101300003",req:"罐区液位计读数偏差，需校验。",desc:"罐区液位计读数偏差。"}),
+R({code:"ZGD20261013014",billNo:"DJZTBG0201",fromOrg:"特气事业部",toOrg:"海南航天",risk:"罐区",unit:"储罐区",dept:"安环部",deptHead:"江凯旋",
+  rectifyUser:"张亮",status:"待接单",dispatchTime:T("2026-10-13","10:02"),acceptTime:T("2026-10-13","10:30"),orderTime:T("2026-10-13","10:40"),
+  deadline:T("2026-10-25","18:00"),checker:"李凡浩",related:"YHD2026101300004",req:"罐区疏散通道标识不足，需补充。",desc:"罐区疏散通道标识不足。"}),
+R({code:"ZGD20261013015",billNo:"DJZTBG0202",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"液氢罐区",unit:"液氢罐区",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",node:0,status:"待验收",dispatchTime:T("2026-10-06","09:30"),acceptTime:T("2026-10-06","10:10"),orderTime:T("2026-10-06","10:20"),
+  receiveTime:T("2026-10-06","10:30"),execTime:T("2026-10-12","11:05"),deadline:T("2026-10-13","18:00"),checker:"王敏",related:"YHD2026100600012",
+  result:"已更换液氢罐区紧急切断阀密封件。",req:"液氢罐区紧急切断阀密封件老化，需更换。",desc:"液氢罐区紧急切断阀密封件老化。"}),
+R({code:"ZGD20261013016",billNo:"DJZTBG0203",fromOrg:"仓储事业部",toOrg:"DME项目",risk:"装卸区",unit:"装卸台",dept:"生产部",deptHead:"孙倩",
+  rectifyUser:"孙倩",status:"待接单",dispatchTime:T("2026-10-13","09:45"),acceptTime:T("2026-10-13","10:05"),orderTime:T("2026-10-13","10:15"),
+  deadline:T("2026-10-22","18:00"),checker:"刘强",related:"YHD2026101300005",req:"装卸区灭火器压力不足，需更换。",desc:"装卸区灭火器压力不足。"}),
+R({code:"ZGD20261013017",billNo:"DJZTBG0204",fromOrg:"集团安全管控",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  rectifyUser:"赵岩",overdue:true,status:"逾期完成",dispatchTime:T("2026-10-02","09:00"),acceptTime:T("2026-10-02","09:40"),orderTime:T("2026-10-02","09:50"),
+  receiveTime:T("2026-10-02","10:00"),execTime:T("2026-10-05","15:30"),closeTime:T("2026-10-08","17:10"),deadline:T("2026-10-06","18:00"),
+  checker:"王敏",related:"YHD2026100200013",result:"已修复罐区防雷接地。",
+  accept:{passed:true,user:"李凡浩",dept:"集团安全管控",time:T("2026-10-08","17:10"),comment:"整改到位，因超期完成，标记逾期完成。"},
+  req:"罐区防雷接地电阻超标，需整改。",desc:"罐区防雷接地电阻超标。"}),
+R({code:"ZGD20261013018",billNo:"DJZTBG0205",fromOrg:"特气事业部",toOrg:"海南航天",risk:"装充区",unit:"充装位",dept:"安环部",deptHead:"江凯旋",
+  rectifyUser:"张亮",node:1,status:"待验收",dispatchTime:T("2026-10-11","08:50"),acceptTime:T("2026-10-11","09:30"),
+  orderTime:T("2026-10-11","09:40"),receiveTime:T("2026-10-11","09:50"),execTime:T("2026-10-13","14:00"),deadline:T("2026-10-17","18:00"),
+  checker:"王敏",ehsUser:"李凡浩",related:"YHD2026101100014",result:"已补齐充装作业记录。",
+  accept:{passed:true,user:"王敏",dept:"海南航天 · 安环部",time:T("2026-10-13","14:40"),comment:"记录完整，同意提交审批。"},
+  yjList:[{label:"验收人 A",user:"王敏",time:T("2026-10-13","14:40"),passed:true,comment:"记录完整，同意提交审批。"}],
+  req:"充装作业记录不完整，需补齐。",desc:"充装作业记录不完整。"}),
+R({code:"ZGD20261013019",billNo:"DJZTBG0206",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"空分装置",unit:"空分装置",dept:"设备部",deptHead:"王海",
+  rectifyUser:"王海",receiveTime:T("2026-10-13","08:40"),status:"整改中",dispatchTime:T("2026-10-13","07:50"),acceptTime:T("2026-10-13","08:30"),
+  orderTime:T("2026-10-13","08:35"),deadline:T("2026-10-26","18:00"),checker:"李凡浩",related:"YHD2026101300006",
+  req:"空分装置安全阀校验超期，需送检。",desc:"空分装置安全阀校验超期。"}),
+R({code:"ZGD20261013020",billNo:"DJZTBG0207",fromOrg:"集团安全管控",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  rectifyUser:"赵岩",overdue:true,status:"逾期完成",dispatchTime:T("2026-10-03","09:20"),acceptTime:T("2026-10-03","10:00"),
+  orderTime:T("2026-10-03","10:10"),receiveTime:T("2026-10-03","10:20"),execTime:T("2026-10-09","15:00"),closeTime:T("2026-10-12","16:00"),
+  deadline:T("2026-10-11","18:00"),checker:"王敏",related:"YHD2026100300015",result:"已补充罐区安全警示标志。",
+  accept:{passed:true,user:"李凡浩",dept:"集团安全管控",time:T("2026-10-12","16:00"),comment:"同意闭环，超期完成。"},
+  req:"罐区安全警示标志缺失，需补充。",desc:"罐区安全警示标志缺失。"}),
+R({code:"ZGD20261013021",billNo:"DJZTBG0208",fromOrg:"特气事业部",toOrg:"海南航天",risk:"罐区",unit:"储罐区",dept:"设备部",deptHead:"王海",
+  status:"待派单",dispatchTime:T("2026-10-13","11:10"),acceptTime:T("2026-10-13","11:40"),deadline:T("2026-10-27","18:00"),checker:"王敏",
+  related:"YHD2026101300007",req:"罐区可燃气体探头漂移，需标定。",desc:"罐区可燃气体探头漂移。"}),
+R({code:"ZGD20261013022",billNo:"DJZTBG0209",fromOrg:"仓储事业部",toOrg:"DME项目",risk:"装卸区",unit:"装卸台",
+  status:"待派单",dispatchTime:T("2026-10-13","12:05"),deadline:T("2026-10-28","18:00"),checker:"刘强",related:"YHD2026101300008",
+  req:"装卸区应急照明失效，需更换。",desc:"装卸区应急照明失效。"}),
+R({code:"ZGD20261013023",billNo:"DJZTBG0210",fromOrg:"特气事业部",toOrg:"海南航天",risk:"液氢罐区",unit:"液氢储罐区",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",status:"已关闭",dispatchTime:T("2026-10-01","09:00"),acceptTime:T("2026-10-01","09:30"),orderTime:T("2026-10-01","09:40"),
+  receiveTime:T("2026-10-01","09:50"),execTime:T("2026-10-04","16:20"),closeTime:T("2026-10-04","17:30"),deadline:T("2026-10-08","18:00"),
+  checker:"李凡浩",related:"YHD2026100100016",result:"已更换液氢罐区温度变送器。",
+  accept:{passed:true,user:"李凡浩",dept:"特气事业部 · 安全管控",time:T("2026-10-04","17:30"),comment:"验收通过。"},
+  req:"液氢罐区温度变送器失真，需更换。",desc:"液氢罐区温度变送器失真。"}),
+R({code:"ZGD20261013024",billNo:"DJZTBG0211",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"装充区",unit:"充装位",dept:"安环部",deptHead:"江凯旋",
+  rectifyUser:"张亮",status:"已关闭",dispatchTime:T("2026-10-10","15:00"),acceptTime:T("2026-10-10","15:30"),execTime:T("2026-10-10","16:00"),
+  closeTime:T("2026-10-10","16:30"),deadline:T("2026-10-13","18:00"),checker:"王敏",related:"YHD2026101000017",
+  opinion:"现场已自行整改，关闭。",commentUser:"李凡浩",req:"充装区地面油污，需清理。",desc:"充装区地面油污。"}),
+R({code:"ZGD20261013025",billNo:"DJZTBG0212",fromOrg:"集团安全管控",toOrg:"海南航天",risk:"液氢罐区",unit:"液氢储罐区",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",overdue:true,node:1,status:"逾期未验收",dispatchTime:T("2026-10-11","14:00"),acceptTime:T("2026-10-11","14:30"),
+  orderTime:T("2026-10-11","14:40"),receiveTime:T("2026-10-11","14:50"),execTime:T("2026-10-13","16:10"),deadline:T("2026-10-12","18:00"),
+  checker:"李凡浩",ehsUser:"李凡浩",related:"YHD2026101100018",result:"已修复罐区消防水炮转动机构。",
+  accept:{passed:false,user:"李凡浩",dept:"海南航天 · 安环部",time:T("2026-10-13","16:40"),comment:"转动仍不灵活，整改不彻底，退回重新整改。"},
+  yjList:[{label:"验收人 A",user:"李凡浩",time:T("2026-10-13","16:40"),passed:false,comment:"转动仍不灵活，整改不彻底，退回重新整改。"}],
+  req:"罐区消防水炮转动不灵活，需检修。",desc:"罐区消防水炮转动不灵活。"}),
+R({code:"ZGD20261013026",billNo:"DJZTBG0213",fromOrg:"特气事业部",toOrg:"海南航天",risk:"空分装置",unit:"空分装置",dept:"设备部",deptHead:"王海",
+  rectifyUser:"张亮",overdue:true,status:"逾期未整改",dispatchTime:T("2026-10-09","13:10"),acceptTime:T("2026-10-09","13:30"),
+  orderTime:T("2026-10-09","13:40"),receiveTime:T("2026-10-09","13:50"),deadline:T("2026-10-12","18:00"),checker:"王敏",
+  related:"YHD2026101300009",req:"空分装置压力表超期未校验，需更换。",desc:"空分装置压力表超期未校验。"}),
+R({code:"ZGD20261013027",billNo:"DJZTBG0214",fromOrg:"集团安全管控",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  rectifyUser:"赵岩",overdue:true,status:"逾期未整改",dispatchTime:T("2026-10-08","11:00"),acceptTime:T("2026-10-08","11:30"),
+  orderTime:T("2026-10-08","11:40"),receiveTime:T("2026-10-08","11:50"),deadline:T("2026-10-11","18:00"),checker:"王敏",
+  related:"YHD2026101300010",req:"罐区排水沟盖板破损，需更换。",desc:"罐区排水沟盖板破损。"}),
+R({code:"ZGD20261013028",billNo:"DJZTBG0215",fromOrg:"特气事业部",toOrg:"海南航天",risk:"装充区",unit:"充装位",
+  status:"草稿",deadline:T("2026-10-30","18:00"),checker:"李凡浩",related:"YHD2026101300011",
+  req:"充装位急停按钮标识模糊，需更换。",desc:"充装位急停按钮标识模糊。"}),
+R({code:"ZGD20261013029",billNo:"DJZTBG0216",fromOrg:"海南航天",toOrg:"海南航天",risk:"厂区道路",unit:"厂区道路",dept:"安环部",deptHead:"江凯旋",
+  status:"待派单",channel:"手动创建",source:"安全检查 · 2026-10-13 海南航天自查",related:"YHD2026101300012",
+  dispatchTime:T("2026-10-13","08:05"),deadline:T("2026-10-18","18:00"),checker:"王敏",
+  req:"厂区道路限速标识缺失，需补充。",desc:"公司自查：厂区道路限速标识缺失。"}),
+R({code:"ZGD20261013030",billNo:"DJZTBG0217",fromOrg:"海南航天",toOrg:"海南航天",risk:"空分装置",unit:"空分装置",dept:"设备部",deptHead:"王海",
+  rectifyUser:"王海",receiveTime:T("2026-10-13","09:20"),status:"整改中",channel:"手动创建",source:"安全检查 · 2026-10-12 海南航天自查",
+  related:"YHD2026101200013",dispatchTime:T("2026-10-12","16:40"),acceptTime:T("2026-10-13","09:00"),orderTime:T("2026-10-13","09:10"),
+  deadline:T("2026-10-19","18:00"),checker:"李凡浩",req:"空分装置现场巡检记录填写不规范，需整改。",desc:"公司自查：巡检记录填写不规范。"}),
+R({code:"ZGD20261013031",billNo:"DJZTBG0218",fromOrg:"海南航天",toOrg:"海南航天",risk:"装充区",unit:"充装位",dept:"安环部",deptHead:"江凯旋",
+  rectifyUser:"张亮",status:"已关闭",channel:"手动创建",source:"安全检查 · 2026-10-10 海南航天自查",related:"YHD2026101000014",
+  dispatchTime:T("2026-10-10","09:00"),acceptTime:T("2026-10-10","09:30"),orderTime:T("2026-10-10","09:40"),receiveTime:T("2026-10-10","09:50"),
+  execTime:T("2026-10-11","15:00"),closeTime:T("2026-10-11","16:20"),deadline:T("2026-10-14","18:00"),checker:"李凡浩",
+  result:"已补充充装区安全告知牌。",
+  accept:{passed:true,user:"李凡浩",dept:"海南航天 · 安环部",time:T("2026-10-11","16:20"),comment:"已完成，闭环。"},
+  req:"充装区安全告知牌缺失，需补充。",desc:"公司自查：充装区安全告知牌缺失。"}),
+R({code:"ZGD20261013032",billNo:"DJZTBG0219",fromOrg:"DME项目",toOrg:"DME项目",risk:"罐区",unit:"储罐区",dept:"技术设备部",deptHead:"刘强",
+  status:"待派单",channel:"手动创建",source:"安全检查 · 2026-10-13 DME项目自查",related:"YHD2026101300015",
+  dispatchTime:T("2026-10-13","07:40"),deadline:T("2026-10-20","18:00"),checker:"刘强",
+  req:"罐区巡检通道照明不足，需增设照明。",desc:"公司自查：罐区巡检通道照明不足。"}),
+R({code:"ZGD20261013033",billNo:"DJZTBG0220",fromOrg:"DME项目",toOrg:"DME项目",risk:"装卸区",unit:"装卸台",dept:"生产部",deptHead:"孙倩",
+  rectifyUser:"孙倩",node:1,status:"待验收",channel:"手动创建",source:"安全检查 · 2026-10-11 DME项目自查",related:"YHD2026101100016",
+  dispatchTime:T("2026-10-11","08:30"),acceptTime:T("2026-10-11","09:00"),orderTime:T("2026-10-11","09:10"),receiveTime:T("2026-10-11","09:20"),
+  execTime:T("2026-10-12","15:30"),deadline:T("2026-10-15","18:00"),checker:"刘强",result:"已更换装卸台防撞条。",
+  accept:{passed:true,user:"刘强",dept:"DME项目 · 安环部",time:T("2026-10-12","16:00"),comment:"现场确认合格，同意。"},
+  req:"装卸台防撞条破损，需更换。",desc:"公司自查：装卸台防撞条破损。"})
+];
+(function(){
+  var r=find("ZGD20261013004");
+  r.flow=[["派发","特气事业部 · 李凡浩",T("2026-10-10","09:00"),"责任公司：海南航天"],
+    ["接收并指派部门","海南航天 · 安环部",T("2026-10-10","10:15"),"整改部门：设备部"],
+    ["派单","设备部负责人 王海",T("2026-10-10","10:16"),"整改人：张亮"],
+    ["接单","张亮",T("2026-10-10","10:20"),""],
+    ["驳回（整改驳回）","验收人 A 王敏",T("2026-10-11","09:10"),"整改措施描述不清，退回重新整改。"],
+    ["重新提交整改","张亮",T("2026-10-12","08:30"),"已补充检修记录，重新提交。"],
+    ["接单","张亮",T("2026-10-12","08:31"),"重新执行整改"]];
+})();
+var state={org:"海南航天",scope:"in",filter:"",kw:"",current:null,view:"list",origin:"list"};
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function tag(s){return '<span class="tag '+((STATUS[s]||{cls:"gray"}).cls)+'">'+esc(s)+"</span>";}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},1700);}
+function f(k,v){return '<div class="f"><span class="k">'+esc(k)+'</span><span class="v">'+esc(v)+"</span></div>";}
+function find(code){var r=null;RECORDS.forEach(function(x){if(x.code===code){r=x;}});return r;}
+function nowStr(){var d=new Date();function p(n){return (n<10?"0":"")+n;}
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
+function scopeRecords(){return state.scope==="out"?RECORDS.filter(function(r){return r.fromOrg===state.org;}):RECORDS.filter(function(r){return r.toOrg===state.org;});}
+function filtered(){
+  var l=scopeRecords();
+  if(state.filter){l=l.filter(function(r){return r.status===state.filter;});}
+  if(state.kw){var k=state.kw.toLowerCase();l=l.filter(function(r){return (r.code+" "+r.risk+" "+r.unit+" "+r.desc).toLowerCase().indexOf(k)>=0;});}
+  return l;
+}
+function apprRecords(){
+  var vis=RECORDS.filter(function(r){return r.toOrg===state.org||r.fromOrg===state.org||DESC[state.org].indexOf(r.toOrg)>=0||DESC[state.org].indexOf(r.fromOrg)>=0;});
+  return vis.filter(function(r){
+    if(ACCEPT_STATUS.indexOf(r.status)<0){return false;}
+    var ns=nodesOf(r);
+    return ns[Math.min(r.node,ns.length-1)].person===CUR_USER;
+  });
+}
+function renderStatusBar(){
+  var sc=scopeRecords();
+  var h="";
+  SORDER.forEach(function(s){
+    var n=sc.filter(function(r){return r.status===s;}).length;
+    h+='<span class="sit'+(state.filter===s?" on":"")+(n?"":" zero")+'" data-s="'+s+'">'+s+" <b>"+n+"</b></span>";
+  });
+  h+='<span class="sit'+(state.filter===""?" on":"")+'" data-s="">全部 <b>'+sc.length+"</b></span>";
+  $("statusItems").innerHTML=h;
+  Array.prototype.forEach.call($("statusItems").querySelectorAll(".sit"),function(el){
+    el.onclick=function(){var s=el.getAttribute("data-s");state.filter=(state.filter===s)?"":s;
+      if(s===""){state.filter="";}renderList();};});
+  $("scopeTip").textContent="当前组织："+state.org+"　数据可见范围：本公司 + 子公司";
+}
+function renderList(){
+  renderStatusBar();
+  var list=filtered(),html="";
+  if(!list.length){
+    var tip=scopeRecords().length?"暂无数据（当前筛选条件下没有匹配单据）"
+      :"当前组织「"+state.org+"」没有「"+(state.scope==="out"?"我派发的":"我收到的")+"」数据；可切换组织或切换另一视角查看";
+    html='<tr><td colspan="13" class="muted" style="text-align:center;padding:34px">'+esc(tip)+"</td></tr>";
+  }
+  list.forEach(function(r,i){
+    html+='<tr><td><input type="checkbox" class="ck"></td><td>'+(i+1)+"</td>"
+      +'<td><span class="link" data-open="'+r.code+'">'+r.code+"</span></td><td>"+tag(r.status)+"</td><td>"+esc(r.channel)+"</td>"
+      +"<td>"+esc(r.fromOrg)+"</td><td>"+esc(r.toOrg)+"</td>"
+      +'<td><span class="link" data-open="'+r.code+'">'+esc(r.related)+"</span></td>"
+      +'<td><span class="ellip" title="'+esc(r.desc)+'">'+esc(r.risk)+"</span></td>"
+      +"<td>"+esc(r.dept||"—")+"</td><td>"+esc(actOf(r))+"</td><td>"+esc(r.deadline||"—")+"</td>"
+      +'<td><span class="link" data-open="'+r.code+'">查看</span> &nbsp; <span class="link" data-open="'+r.code+'">编辑</span></td></tr>';
+  });
+  $("tbody").innerHTML=html;
+  $("sumTip").textContent="共 "+list.length+" 条";
+  Array.prototype.forEach.call($("tbody").querySelectorAll("[data-open]"),function(el){
+    el.onclick=function(){openDetail(el.getAttribute("data-open"));};});
+  renderAppr();
+}
+function renderAppr(){
+  var list=apprRecords(),h="";
+  if(!list.length){h='<tr><td colspan="11" class="muted" style="text-align:center;padding:34px">暂无待我审批的单据</td></tr>';}
+  list.forEach(function(r,i){
+    var n=nodesOf(r)[Math.min(r.node,nodesOf(r).length-1)];
+    h+="<tr><td>"+(i+1)+"</td>"
+      +'<td><span class="link" data-open="'+r.code+'">'+r.code+"</span></td>"
+      +"<td>"+tag(r.status)+"</td><td>"+esc(n.label)+"</td><td>"+esc(n.person)+"</td>"
+      +"<td>"+esc(r.fromOrg)+"</td><td>"+esc(r.toOrg)+"</td>"
+      +'<td><span class="ellip" title="'+esc(r.desc)+'">'+esc(r.desc)+"</span></td><td>"+esc(r.execTime||"—")+"</td><td>"+esc(r.deadline||"—")+"</td>"
+      +'<td><span class="link" data-appr="'+r.code+'">审批</span> &nbsp; <span class="link" data-open="'+r.code+'">查看</span></td></tr>';
+  });
+  $("apprBody").innerHTML=h;
+  $("apprSum").textContent="共 "+list.length+" 条";
+  var b=$("apprBadge");b.textContent=list.length;b.className="badge"+(list.length?"":" zero");
+  Array.prototype.forEach.call($("apprBody").querySelectorAll("[data-open]"),function(el){
+    el.onclick=function(){openDetail(el.getAttribute("data-open"));};});
+  Array.prototype.forEach.call($("apprBody").querySelectorAll("[data-appr]"),function(el){
+    el.onclick=function(){var r=find(el.getAttribute("data-appr"));state.current=r;openApprove(r,"pass");};});
+}
+function attHtml(list){
+  if(!list||!list.length){return '<span class="muted">无</span>';}
+  var h="";
+  list.forEach(function(a){
+    h+='<div class="item"><div class="ph '+(a.kind==="vid"?"vid":"")+'"><img src="'+a.src+'" alt="'+esc(a.name)+'"></div>'
+      +'<div class="cap" title="'+esc(a.name)+'">'+esc(a.name)+"</div></div>";
+  });
+  return h;
+}
+function seedFlow(r){
+  if(r.flow&&r.flow.length){return r.flow.slice();}
+  var fl=[];
+  if(r.dispatchTime){fl.push(["派发",r.fromOrg+" · "+r.creator,r.dispatchTime,"责任公司："+r.toOrg]);}
+  if(r.acceptTime){fl.push(["接收并指派部门",r.toOrg+" · 安环部",r.acceptTime,"整改部门："+(r.dept||"—")]);}
+  if(r.orderTime){fl.push(["派单",(r.deptHead||"整改部门负责人"),r.orderTime,"整改人："+(r.rectifyUser||"—")]);}
+  if(r.receiveTime){fl.push(["接单",r.rectifyUser||"—",r.receiveTime,""]);}
+  if(r.execTime){fl.push(["提交验收",r.rectifyUser||"—",r.execTime,r.result||""]);}
+  (r.yjList||[]).forEach(function(y){fl.push([y.label+(y.passed?" 验收通过":" 验收不通过"),y.user,y.time,y.comment]);});
+  if(r.opinion){fl.push(["审批意见",r.commentUser||"—",r.closeTime||"",r.opinion]);}
+  if(r.status==="已关闭"||r.status==="逾期完成"){fl.push([r.status,r.commentUser||r.creator,r.closeTime||"",r.overdue?"超期完成闭环":"闭环完成"]);}
+  if(r.status.indexOf("逾期")===0){fl.push(["超期提醒","系统",r.deadline,"已超过整改期限"]);}
+  if(ACCEPT_STATUS.indexOf(r.status)>=0){fl.push(["当前节点："+nodesOf(r)[Math.min(r.node,nodesOf(r).length-1)].label,"处理人："+actOf(r),"","等待处理"]);}
+  return fl;
+}
+function chainOf(r){
+  var ns=nodesOf(r),acc=(ACCEPT_STATUS.indexOf(r.status)>=0),done=(r.status==="已关闭"||r.status==="逾期完成");
+  return ns.map(function(n,i){
+    var st;
+    if(done){st="done";}
+    else if(acc){st=(i<r.node)?"done":(i===r.node?"current":"wait");}
+    else{st="wait";}
+    var yj=(r.yjList||[]).filter(function(y){return y.label===n.label;});
+    return {label:n.label,who:n.who,st:st,
+      by:(st==="done"?"已通过":(st==="current"?"处理中":"待处理")),
+      cmt:(st==="wait")?"":(yj.length?yj[yj.length-1].comment:"")};
+  });
+}
+function actions(r){
+  var s=r.status,a=[];
+  if(s==="草稿"){a.push(["提交派发","solid","dispatch"]);}
+  if(s==="待派单"){a.push(["接收并指派部门","","receive"]);a.push(["派单","solid","order"]);a.push(["关闭","danger","close"]);}
+  if(s==="待接单"){a.push(["接单","solid","accept"]);a.push(["退单","","backorder"]);a.push(["关闭","danger","close"]);}
+  if(s==="整改中"){a.push(["提交验收","solid","submit"]);a.push(["关闭","danger","close"]);}
+  if(s==="待验收"){a.push(["验收","solid","approve"]);}
+  if(s==="逾期未整改"){a.push(["提交验收","solid","submit"]);a.push(["关闭","danger","close"]);}
+  if(s==="逾期未验收"){a.push(["验收","solid","approve"]);}
+  return a;
+}
+function openDetail(code){
+  var r=find(code);if(!r){return;}
+  if(state.view!=="detail"){state.origin=state.view;}
+  state.current=r;state.view="detail";
+  $("viewList").hidden=true;$("viewAppr").hidden=true;$("viewNew").hidden=true;$("viewDetail").hidden=false;
+  $("crumb").textContent="整改单";
+  $("dTitle").textContent="整改单 "+r.code+(r.billNo?"（"+r.billNo+"）":"");
+  $("dStatus").innerHTML=tag(r.status);
+  var nn=nodesOf(r)[Math.min(r.node,nodesOf(r).length-1)];
+  $("nodeHint").innerHTML="当前状态：<b>"+esc(r.status)+"</b>　当前节点：<b>"+(ACCEPT_STATUS.indexOf(r.status)>=0?esc(nn.label):"—")+"</b>　应付方：<b>"+esc(actOf(r))+"</b>　（原型中状态按钮均可直接点击，便于走完整流程）";
+  var ab="";actions(r).forEach(function(x){ab+='<button class="btn '+x[1]+'" data-act="'+x[2]+'">'+x[0]+"</button> "});
+  $("actionBar").innerHTML=ab;
+  Array.prototype.forEach.call($("actionBar").querySelectorAll("[data-act]"),function(el){
+    el.onclick=function(){doAction(el.getAttribute("data-act"));};});
+  $("dBase").innerHTML=f("整改单编号",r.code)+f("单据编号",r.billNo||"—")+f("整改单状态",r.status)+f("渠道分类",r.channel)
+    +f("关联单号",r.related)+f("来源检查单",r.source)+f("风险对象",r.risk)+f("分析单元",r.unit)
+    +f("隐患等级",r.level)+f("紧急程度",r.urgent)+f("隐患类型",r.htype)+f("隐患类别",r.hcat)
+    +f("隐患治理类型",r.gov)+f("级别",r.grade)+f("整改部门",r.dept||"—")+f("整改部门负责人",r.deptHead||"—")
+    +f("整改人",r.rectifyUser||"—")+f("整改期限",r.deadline||"—")+f("验收人 A",r.checker)+f("登记人",r.creator);
+  $("dScene").innerHTML=attHtml(r.scene.concat(r.videos));
+  $("dDispatch").innerHTML=f("派发方组织",r.fromOrg)+f("责任公司",r.toOrg)+f("派发时间",r.dispatchTime||"—")+f("接收时间",r.acceptTime||"—")
+    +f("当前处理人",actOf(r))+f("数据可见范围","本公司 + 子公司")+f("跨租户","是")+f("派单号",r.orderNo||"—");
+  $("dReq").innerHTML='<div class="field-note"><b>隐患描述：</b>'+esc(r.desc||r.req)+"\n\n<b>整改要求：</b>"+esc(r.req)+"</div>";
+  $("dExec").innerHTML=f("整改人",r.rectifyUser||"—")+f("接单时间",r.receiveTime||"—")+f("整改提交时间",r.execTime||"—")+f("整改结果",r.result||"—");
+  $("dAfter").innerHTML=attHtml((r.after||[]).concat(r.afterVideo||[]));
+  var ac=r.accept||{},has=!!ac.time;
+  $("dAccept").innerHTML='<div class="accept-card'+(has&&ac.passed?"":" no")+'">'
+    +'<div class="fpline"><span>验收结论：<b>'+(has?(ac.passed?"通过":"不通过"):"尚未验收")+"</b></span>"
+    +"<span>验收单号：<b>"+esc(r.acceptNo||"—")+"</b></span><span>验收人：<b>"+esc(ac.user||"—")+"</b></span>"
+    +"<span>验收部门：<b>"+esc(ac.dept||"—")+"</b></span><span>验收时间：<b>"+esc(ac.time||"—")+"</b></span></div>"
+    +'<div class="field-note"><b>验收意见：</b>'+esc(ac.comment||"待验收流程完成后回填（最终验收通过时写入整单验收意见）")+"</div>"
+    +'<div class="kbody" style="margin-top:10px">验收照片 / 验收视频</div>'
+    +'<div class="att">'+attHtml(has?((ac.photos||[]).concat(ac.videos||[])):[])+"</div></div>";
+  var sh="";chainOf(r).forEach(function(s){
+    sh+='<div class="step '+(s.st||"wait")+'"><div class="node">'+esc(s.label)+'</div><div class="who">'+esc(s.who||"—")+"</div>"
+      +'<div class="who">'+esc(s.by)+"</div>"+(s.cmt?'<div class="cmt">'+esc(s.cmt)+"</div>":"")+"</div>";});
+  $("dSteps").innerHTML=sh;
+  var fl=seedFlow(r).slice().reverse(),tl="";
+  fl.forEach(function(e){
+    var cls="ok";if((""+e[0]).indexOf("驳回")>=0||(""+e[0]).indexOf("不通过")>=0||(""+e[0]).indexOf("超期")>=0&&(""+e[0]).indexOf("提醒")<0){cls="no";}
+    if((""+e[0]).indexOf("当前节点")===0){cls="";}
+    tl+='<div class="tl '+cls+'"><div class="h">'+esc(e[0])+'</div><div class="m">'+esc(e[1])+(e[2]?" · "+esc(e[2]):"")+"</div>"
+      +(e[3]?'<div class="c">'+esc(e[3])+"</div>":"")+"</div>";});
+  $("dTimeline").innerHTML=tl;
+}
+function openApprove(r,def){
+  state.current=r;
+  var ns=nodesOf(r),cur=Math.min(r.node,ns.length-1);
+  $("apTitle").textContent="验收（当前节点："+ns[cur].label+"）";
+  $("aNode").textContent=ns[cur].label+"　处理人："+actOf(r);
+  $("aComment").value="";
+  var opts="";
+  for(var i=cur-1;i>=0;i--){opts+='<option value="'+i+'">'+ns[i].label+"（已完成）</option>";}
+  $("aRejectNode").innerHTML=opts;
+  var nodeOpt=$("aTarget").querySelector('option[value="node"]');
+  if(nodeOpt){nodeOpt.disabled=(opts==="");}
+  if(def==="reject"){
+    document.querySelector('input[name="ar"][value="reject"]').checked=true;
+    $("rejectBox").style.display="flex";$("aTarget").value="initiator";$("rejectNodeBox").style.display="none";
+  }else{
+    document.querySelector('input[name="ar"][value="pass"]').checked=true;
+    $("rejectBox").style.display="none";$("rejectNodeBox").style.display="none";
+  }
+  openModal("mApprove");
+}
+function openModal(id){$("mask").classList.add("show");$(id).classList.add("show");}
+function closeModal(){$("mask").classList.remove("show");
+  ["mReceive","mOrder","mExec","mApprove","mClose"].forEach(function(i){$(i).classList.remove("show");});}
+Array.prototype.forEach.call(document.querySelectorAll("[data-close]"),function(el){el.onclick=closeModal;});
+$("mask").onclick=closeModal;
+Array.prototype.forEach.call(document.querySelectorAll('input[name="ar"]'),function(el){
+  el.onchange=function(){
+    var rej=(this.value==="reject");
+    $("rejectBox").style.display=rej?"flex":"none";
+    $("rejectNodeBox").style.display=(rej&&$("aTarget").value==="node")?"flex":"none";
+  };});
+$("aTarget").onchange=function(){$("rejectNodeBox").style.display=(this.value==="node")?"flex":"none";};
+$("sgOut").onclick=function(){state.scope="out";state.filter="";$("sgOut").classList.add("on");$("sgIn").classList.remove("on");renderList();};
+$("sgIn").onclick=function(){state.scope="in";state.filter="";$("sgIn").classList.add("on");$("sgOut").classList.remove("on");renderList();};
+$("btnQuery").onclick=function(){state.kw=$("kw").value.trim();renderList();};
+$("btnReset").onclick=function(){$("kw").value="";state.kw="";state.filter="";renderList();};
+$("menuZgd").onclick=function(){$("menuZgd").classList.add("active");$("menuAppr").classList.remove("active");
+  state.view="list";$("viewDetail").hidden=true;$("viewNew").hidden=true;$("viewAppr").hidden=true;$("viewList").hidden=false;
+  $("crumb").textContent="整改单";renderList();};
+$("menuAppr").onclick=function(){$("menuAppr").classList.add("active");$("menuZgd").classList.remove("active");
+  state.view="appr";$("viewDetail").hidden=true;$("viewNew").hidden=true;$("viewList").hidden=true;$("viewAppr").hidden=false;
+  $("crumb").textContent="待我审批";renderAppr();};
+$("btnBack").onclick=function(){$("viewDetail").hidden=true;
+  if(state.origin==="appr"){$("viewAppr").hidden=false;renderAppr();}else{$("viewList").hidden=false;renderList();}};
+$("btnImport").onclick=function(){toast("导入：按模板导入生成整改单（原型占位）；导入后可批量派发");};
+$("btnBatch").onclick=function(){toast("批量派发：对导入或勾选的整改一次性派发（原型占位）");};
+$("btnOrderSel").onclick=function(){toast("派单：勾选待派单单据后派单（原型占位）");};
+$("btnRecallSel").onclick=function(){toast("收回：勾选待派单单据后收回（原型占位）");};
+$("btnCloseSel").onclick=function(){toast("关闭：勾选单据后关闭（原型占位）");};
+$("ckAll").onclick=function(){var on=this.checked;Array.prototype.forEach.call(document.querySelectorAll(".ck"),function(c){c.checked=on;});};
+function showNew(){$("viewList").hidden=true;$("viewAppr").hidden=true;$("viewDetail").hidden=true;$("viewNew").hidden=false;
+  $("fReg").value="李凡浩 "+nowStr();fillTo();window.scrollTo(0,0);}
+$("btnNew").onclick=showNew;
+$("btnNewBack").onclick=$("btnNewCancel").onclick=$("btnNewCancel2").onclick=function(){$("viewNew").hidden=true;$("viewList").hidden=false;renderList();};
+$("btnNewSave").onclick=$("btnNewSave2").onclick=function(){
+  var to=$("fTo").value,desc=$("fDesc").value.trim(),req=$("fReq").value.trim(),dl=$("fDeadline").value;
+  if(!to||!desc||!req||!dl){toast("请填写必填项（责任公司 / 隐患描述 / 整改要求 / 整改期限）");return;}
+  var code="ZGD"+String(Date.now()).slice(-11);
+  RECORDS.unshift(R({code:code,billNo:"DJZTBG"+String(Date.now()).slice(-4),fromOrg:state.org,toOrg:to,channel:$("fChannel").value,
+    source:"安全检查 · "+$("fSource").value,related:$("fSource").value,risk:$("fRisk").value,unit:$("fUnit").value,
+    level:$("fLevel").value,urgent:$("fUrgent").value,htype:$("fType").value,hcat:$("fCat").value,gov:$("fGov").value,grade:$("fGrade").value,
+    desc:desc,req:req,deadline:dl,checker:$("fChecker").value,status:"待派单",dispatchTime:nowStr(),
+    flow:[["派发",state.org+" · 李凡浩",nowStr(),"责任公司："+to]]}));
+  $("viewNew").hidden=true;$("viewList").hidden=false;state.scope="out";state.filter="";
+  $("sgOut").classList.add("on");$("sgIn").classList.remove("on");
+  renderList();toast("派发成功，已向 "+to+" 安环部生成待办");
+};
+function doAction(act){
+  var r=state.current;if(!r){return;}
+  if(act==="dispatch"){r.status="待派单";r.dispatchTime=nowStr();r.flow=seedFlow(r);r.flow.push(["派发",r.fromOrg+" · 李凡浩",nowStr(),"责任公司："+r.toOrg]);toast("已派发，状态=待派单");}
+  else if(act==="receive"){$("rcSource").innerHTML=esc("来源："+r.source+"\n隐患描述："+(r.desc||r.req));openModal("mReceive");return;}
+  else if(act==="order"){$("orSource").innerHTML=esc("来源："+r.source+"\n隐患描述："+(r.desc||r.req)+"\n风险对象："+r.risk);$("orDeadline").value=r.deadline||"";$("orChecker").value=r.checker;$("orReq").value=r.req;openModal("mOrder");return;}
+  else if(act==="accept"){r.status="整改中";r.receiveTime=nowStr();toast("已接单，状态=整改中");}
+  else if(act==="backorder"){r.status="待派单";toast("已退单，状态=待派单");}
+  else if(act==="submit"){openModal("mExec");return;}
+  else if(act==="approve"){openApprove(r,"pass");return;}
+  else if(act==="close"){openModal("mClose");return;}
+  openDetail(r.code);renderList();
+}
+$("mReceiveOk").onclick=function(){
+  var r=state.current,d=$("rcDept").value;
+  r.dept=d;r.deptHead=$("rcHead").value||"江凯旋";r.acceptTime=nowStr();r.status="待派单";
+  closeModal();openDetail(r.code);renderList();toast("已接收并指派整改部门："+d+"（待整改部门负责人派单）");
+};
+$("mReceiveAssignTo").onclick=function(){
+  var r=state.current;r.dept=$("rcDept").value;r.deptHead=$("rcHead").value||"江凯旋";r.acceptTime=nowStr();
+  r.status="待接单";r.rectifyUser=r.rectifyUser||"张亮";r.orderTime=nowStr();
+  closeModal();openDetail(r.code);renderList();toast("已直接指派整改人，状态=待接单");
+};
+$("mOrderOk").onclick=function(){
+  var r=state.current;r.rectifyUser=$("orUser").value;r.deadline=$("orDeadline").value;r.checker=$("orChecker").value;
+  r.status="待接单";r.orderTime=nowStr();r.orderNo="ZGPD"+String(Date.now()).slice(-4);
+  closeModal();openDetail(r.code);renderList();toast("派单成功：整改人 "+r.rectifyUser+"，状态=待接单");
+};
+$("mExecOk").onclick=function(){
+  var r=state.current;r.result=$("exResult").value.trim();if(!r.result){toast("请填写整改结果描述");return;}
+  r.execTime=nowStr();r.status="待验收";r.node=0;r.yjList=[];r.overdue=false;
+  r.after=[PH(r.code+"_after.jpg","整改后照片","#9fe0b5","#1f9c4d")];r.afterVideo=[VD(r.code+"_after.mp4","整改后视频")];
+  closeModal();openDetail(r.code);renderList();toast("已提交验收，状态=待验收（验收人 A："+r.checker+"）");
+};
+$("mApproveOk").onclick=function(){
+  var r=state.current;if(!r){return;}
+  var mode=document.querySelector('input[name="ar"]:checked').value,cmt=$("aComment").value.trim();
+  if(!cmt){toast("请填写验收意见");return;}
+  var ns=nodesOf(r),n=ns[Math.min(r.node,ns.length-1)];
+  r.acceptNo="ZGYSD"+String(Date.now()).slice(-6);
+  r.opinion=cmt;r.commentUser="李凡浩";
+  r.yjList=(r.yjList||[]).concat([{label:n.label,user:"李凡浩",time:nowStr(),passed:(mode==="pass"),comment:cmt}]);
+  r.accept={passed:(mode==="pass"),user:"李凡浩",dept:(r.node===0?r.toOrg+" · 安环部":r.fromOrg),time:nowStr(),comment:cmt,
+    photos:[PH(r.code+"_ys.jpg","验收照片","#ffd7a8","#d48806")],videos:[]};
+  if(mode==="pass"){
+    if(r.node<ns.length-1){r.node++;r.status=(r.status==="逾期未验收")?"逾期未验收":"待验收";
+      toast("本级验收通过，流转至："+ns[r.node].label);}
+    else{
+      var late=r.overdue||r.status==="逾期未验收";
+      r.status=late?"逾期完成":"已关闭";r.closeTime=nowStr();
+      if(late){r.overdue=true;}
+      toast(late?"验收通过：逾期完成（验收意见已回填）":"验收通过：已关闭（验收意见已回填）");
+    }
+  }else{
+    var t=$("aTarget").value;
+    if(t==="initiator"){r.status="整改中";toast("已驳回：整改驳回（退回整改执行人）");}
+    else{
+      var idx=parseInt($("aRejectNode").value,10);
+      if(isNaN(idx)){toast("请选择驳回节点");return;}
+      r.node=idx;r.status=(r.status==="逾期未验收")?"逾期未验收":"待验收";
+      toast("已驳回：验收驳回（退回 "+ns[idx].label+"）");
+    }
+  }
+  closeModal();openDetail(r.code);renderList();
+};
+$("mCloseOk").onclick=function(){
+  var r=state.current;r.opinion=$("clReason").value.trim();r.commentUser="李凡浩";r.status="已关闭";r.closeTime=nowStr();
+  closeModal();openDetail(r.code);renderList();toast("已关闭");
+};
+function fillOrg(){
+  var h="";ORGS.forEach(function(o){h+='<option value="'+o+'">'+o+"</option>";});
+  $("orgSel").innerHTML=h;$("orgSel").value=state.org;
+  $("orgSel").onchange=function(){state.org=$("orgSel").value;state.filter="";renderList();fillTo();
+    toast("当前组织："+state.org+"（可见范围：本公司 + 子公司）");};
+}
+function fillTo(){var h="";DESC[state.org].forEach(function(o){h+='<option>'+o+"</option>";});$("fTo").innerHTML=h;}
+fillOrg();fillTo();renderList();
+</script>
+</body>
+</html>

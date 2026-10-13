@@ -6,6 +6,15 @@
 
 - `index.html`：安全作业移动工作台
 - `inspection-crossday.html`：巡检计划跨天任务时间
+- `cross-org-rectification/index.html`：集团 / 事业部整改派发（Web 端）
+
+## 集团 / 事业部整改派发（Web 端）
+
+集团、事业部向项目公司派发整改、项目公司逐级指派、验收结果逐级审批并回到派发单位闭环的 Web 端交互原型。
+
+包含整改单列表（我派发的 / 我收到的 + 状态栏）、待我审批、新增整改整页表单、整改单详情（基础信息、派发信息、整改执行、验收意见与验收流程、倒序流转记录）、派单抽屉与多级验收（可通过 / 驳回，驳回可选驳回到发起或指定已流转节点）。
+
+在线预览：`https://erisanne.github.io/safety-management-prototype/cross-org-rectification/`
 
 ## 原型包含的交互
 
