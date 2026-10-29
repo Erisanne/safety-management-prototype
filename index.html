@@ -181,7 +181,7 @@
     }
     .states.hidden { display: none; }
 
-    /* ===== 待办搜索 ===== */
+    /* ===== 当前模块与状态范围内的标题搜索 ===== */
     .searchbar {
       display: flex;
       align-items: center;
@@ -201,7 +201,7 @@
       font-size: 13px;
       color: var(--ink);
     }
-    .searchbar input::placeholder { color: #a9b2c0; }
+
     .empty { display: none; padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
 
     /* ===== 巡检待领取筛选 ===== */
@@ -389,7 +389,7 @@
         </nav>
         <div class="searchbar" id="searchbar">
           <i class="ri-search-line"></i>
-          <input id="todoSearch" type="search" placeholder="搜索当前状态下的标题" oninput="renderTodo()" />
+          <input id="todoSearch" type="search" aria-label="搜索当前模块与状态下的标题" oninput="renderTodo()" />
         </div>
         <div class="inspection-filters hidden" id="inspectionFilters">
           <div class="filter-row">
@@ -422,6 +422,20 @@
                 <div class="field"><span>上报时间</span><strong>2026-10-29 09:20</strong></div>
               </div>
             </article>
+            <article class="item">
+              <div class="line"><b>临时配电箱缺少漏电保护</b><span class="tag">待派单</span></div>
+              <div class="fields">
+                <div class="field"><span>上报人</span><strong>陈强</strong></div>
+                <div class="field"><span>上报时间</span><strong>2026-10-29 08:35</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>仓库消防通道被货物占用</b><span class="tag">待派单</span></div>
+              <div class="fields">
+                <div class="field"><span>上报人</span><strong>赵海</strong></div>
+                <div class="field"><span>上报时间</span><strong>2026-10-28 17:40</strong></div>
+              </div>
+            </article>
           </section>
 
           <!-- 待办 · 整改 -->
@@ -431,6 +445,20 @@
               <div class="fields">
                 <div class="field"><span>创建人</span><strong>王工</strong></div>
                 <div class="field"><span>创建时间</span><strong>2026-10-29 08:45</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>装卸区域警示标识缺失</b><span class="tag">待派单</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>刘杰</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-29 08:10</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>应急照明灯具失效</b><span class="tag">待派单</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>赵海</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-28 15:35</strong></div>
               </div>
             </article>
           </section>
@@ -443,6 +471,13 @@
                 <div class="field"><span>创建时间</span><strong>2026-10-28 16:10</strong></div>
               </div>
             </article>
+            <article class="item">
+              <div class="line"><b>高处作业平台护栏松动</b><span class="tag">待接单</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>陈强</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-28 11:25</strong></div>
+              </div>
+            </article>
           </section>
 
           <section class="group pending" data-type="rectification" data-state="rectify">
@@ -453,6 +488,13 @@
                 <div class="field"><span>创建时间</span><strong>2026-10-28 10:05</strong></div>
               </div>
             </article>
+            <article class="item">
+              <div class="line"><b>危化品柜安全标识脱落</b><span class="tag">整改中</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>周明</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-27 15:50</strong></div>
+              </div>
+            </article>
           </section>
 
           <section class="group pending" data-type="rectification" data-state="verify">
@@ -461,6 +503,13 @@
               <div class="fields">
                 <div class="field"><span>创建人</span><strong>陈强</strong></div>
                 <div class="field"><span>创建时间</span><strong>2026-10-27 14:30</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>临时用电箱接地不规范</b><span class="tag">待验收</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>李伟</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-26 09:15</strong></div>
               </div>
             </article>
           </section>
@@ -488,6 +537,20 @@
                 <div class="field"><span>计划结束</span><strong>2026-10-29 16:00</strong></div>
               </div>
             </article>
+            <article class="item inspection-card" data-category="equipment" data-slot="20-8" data-plan-start="2026-10-28" data-plan-end="2026-10-29">
+              <div class="line"><b>配电房夜间运行巡检</b><span class="tag">待领取</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 07:30</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 08:30</strong></div>
+              </div>
+            </article>
+            <article class="item inspection-card" data-category="chemical" data-slot="12-20" data-plan-start="2026-10-29" data-plan-end="2026-10-29">
+              <div class="line"><b>装卸区化学品存放巡检</b><span class="tag">待领取</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 15:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 17:00</strong></div>
+              </div>
+            </article>
             <article class="item inspection-card" data-category="equipment" data-slot="8-12" data-plan-start="2026-10-20" data-plan-end="2026-10-21">
               <div class="line"><b>设备设施过期计划巡检</b><span class="tag">待领取</span></div>
               <div class="fields">
@@ -512,6 +575,20 @@
                 <div class="field"><span>计划结束</span><strong>2026-10-29 23:00</strong></div>
               </div>
             </article>
+            <article class="item inspection-card" data-category="equipment" data-slot="8-12" data-plan-start="2026-10-28" data-plan-end="2026-10-30">
+              <div class="line"><b>动力设备运行状态巡检</b><span class="tag">待巡检</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 08:30</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 10:00</strong></div>
+              </div>
+            </article>
+            <article class="item inspection-card" data-category="fire" data-slot="12-20" data-plan-start="2026-10-27" data-plan-end="2026-10-31">
+              <div class="line"><b>重点防火部位日常巡检</b><span class="tag">待巡检</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 13:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 15:00</strong></div>
+              </div>
+            </article>
           </section>
 
           <!-- 待办 · 作业 -->
@@ -522,6 +599,22 @@
                 <div class="field"><span>作业类型</span><strong>动火作业</strong></div>
                 <div class="field"><span>作业级别</span><strong>一级</strong></div>
                 <div class="field"><span>申请人</span><strong>李伟</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>仓库临时用电作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>临时用电作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>三级</strong></div>
+                <div class="field"><span>申请人</span><strong>赵海</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>污水管线开挖动土作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>动土作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>二级</strong></div>
+                <div class="field"><span>申请人</span><strong>周明</strong></div>
               </div>
             </article>
           </section>
@@ -535,6 +628,22 @@
                 <div class="field"><span>申请人</span><strong>周明</strong></div>
               </div>
             </article>
+            <article class="item">
+              <div class="line"><b>地下管廊检修有限空间作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>受限空间作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>一级</strong></div>
+                <div class="field"><span>申请人</span><strong>刘杰</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>储罐区动火前气体检测</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>动火作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>一级</strong></div>
+                <div class="field"><span>申请人</span><strong>李伟</strong></div>
+              </div>
+            </article>
           </section>
 
           <section class="group pending" data-type="work" data-state="perform">
@@ -544,6 +653,22 @@
                 <div class="field"><span>作业类型</span><strong>高处作业</strong></div>
                 <div class="field"><span>作业级别</span><strong>二级</strong></div>
                 <div class="field"><span>申请人</span><strong>林安全</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>室外设备吊装作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>吊装作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>二级</strong></div>
+                <div class="field"><span>申请人</span><strong>陈强</strong></div>
+              </div>
+            </article>
+            <article class="item">
+              <div class="line"><b>机泵检修临时用电作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>临时用电作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>三级</strong></div>
+                <div class="field"><span>申请人</span><strong>王工</strong></div>
               </div>
             </article>
           </section>
@@ -563,7 +688,7 @@
         <div class="plist">
           <div><span>所属组织</span><span>海南航天</span></div>
           <div><span>手机号</span><span>138****0587</span></div>
-          <div><span>当前版本</span><span>v1.2.4（原型）</span></div>
+          <div><span>当前版本</span><span>v1.2.6（原型）</span></div>
         </div>
       </section>
     </div>
