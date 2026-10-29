@@ -182,16 +182,14 @@
     .states.hidden { display: none; }
 
     /* ===== 待办搜索 ===== */
-    .subact { margin-left: auto; font-size: 18px; color: #7d899b; }
     .searchbar {
-      display: none;
+      display: flex;
       align-items: center;
       gap: 8px;
       background: #fff;
       border-bottom: 1px solid var(--line);
-      padding: 8px 16px;
+      padding: 10px 16px;
     }
-    .searchbar.on { display: flex; }
     .searchbar i { color: #a4aebd; font-size: 16px; }
     .searchbar input {
       flex: 1;
@@ -204,7 +202,6 @@
       color: var(--ink);
     }
     .searchbar input::placeholder { color: #a9b2c0; }
-    .searchbar .cancel { color: var(--b); font-size: 12px; }
     .empty { display: none; padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
 
     /* ===== 巡检待领取筛选 ===== */
@@ -380,12 +377,6 @@
       <section id="todo" class="page">
         <div class="sub">
           <button class="back" onclick="go('home')"><i class="ri-arrow-left-s-line"></i></button>待办中心
-          <button class="subact" onclick="toggleSearch()" aria-label="搜索待办"><i class="ri-search-line"></i></button>
-        </div>
-        <div class="searchbar" id="searchbar">
-          <i class="ri-search-line"></i>
-          <input id="todoSearch" type="search" placeholder="搜索当前模块与状态下的标题" oninput="renderTodo()" />
-          <button class="cancel" onclick="clearSearch()">取消</button>
         </div>
         <nav class="types" id="typeTabs">
           <span class="on" data-type="hazard">隐患</span>
@@ -396,6 +387,10 @@
         <nav class="states" id="stateTabs">
           <span class="on" data-state="dispatch">待我派单</span>
         </nav>
+        <div class="searchbar" id="searchbar">
+          <i class="ri-search-line"></i>
+          <input id="todoSearch" type="search" placeholder="搜索当前状态下的标题" oninput="renderTodo()" />
+        </div>
         <div class="inspection-filters hidden" id="inspectionFilters">
           <div class="filter-row">
             <span class="filter-label">巡检分类</span>
@@ -568,7 +563,7 @@
         <div class="plist">
           <div><span>所属组织</span><span>海南航天</span></div>
           <div><span>手机号</span><span>138****0587</span></div>
-          <div><span>当前版本</span><span>v1.2.3（原型）</span></div>
+          <div><span>当前版本</span><span>v1.2.4（原型）</span></div>
         </div>
       </section>
     </div>
@@ -683,20 +678,6 @@
         visible += groupHits;
       });
       document.getElementById("todoEmpty").style.display = visible ? "none" : "block";
-    }
-    function toggleSearch() {
-      var bar = document.getElementById("searchbar");
-      bar.classList.toggle("on");
-      if (bar.classList.contains("on")) {
-        document.getElementById("todoSearch").focus();
-      } else {
-        clearSearch();
-      }
-    }
-    function clearSearch() {
-      document.getElementById("todoSearch").value = "";
-      document.getElementById("searchbar").classList.remove("on");
-      renderTodo();
     }
     document.querySelectorAll("#typeTabs span").forEach(function (x) {
       x.onclick = function () {
