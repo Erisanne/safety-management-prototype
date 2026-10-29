@@ -31,30 +31,6 @@
       display: flex;
       flex-direction: column;
     }
-    .top {
-      height: 64px;
-      flex: none;
-      background: linear-gradient(135deg, #145fd8, #3977f2);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 18px;
-    }
-    .brand { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 700; }
-    .logo {
-      width: 34px; height: 34px;
-      border-radius: 10px;
-      background: #fff; color: var(--b);
-      display: grid; place-items: center;
-      font-style: normal; font-size: 16px;
-    }
-    .avatar {
-      width: 32px; height: 32px;
-      border: 2px solid #fff; border-radius: 50%;
-      color: #fff; font-size: 13px;
-    }
-
     .scroll {
       flex: 1;
       overflow-y: auto;
@@ -263,12 +239,6 @@
       font: inherit;
       font-size: 12px;
     }
-    .period-note {
-      flex: 1;
-      color: #4f6f9d;
-      font-size: 11px;
-      line-height: 1.5;
-    }
     .time-slots {
       display: flex;
       flex: 1;
@@ -383,11 +353,6 @@
 </head>
 <body>
   <main class="app">
-    <header class="top">
-      <div class="brand"><i class="logo">安</i>安全作业</div>
-      <button class="avatar" onclick="go('profile')">林</button>
-    </header>
-
     <div class="scroll">
       <!-- ============ 首页 ============ -->
       <section id="home" class="page on">
@@ -449,10 +414,6 @@
               <span data-slot="12-20">12~20点</span>
               <span data-slot="20-8">20~8点</span>
             </div>
-          </div>
-          <div class="filter-row">
-            <span class="filter-label">计划日期</span>
-            <span class="period-note">默认显示计划开始日期≤当前日期≤计划结束日期的任务</span>
           </div>
         </div>
 
@@ -607,7 +568,7 @@
         <div class="plist">
           <div><span>所属组织</span><span>海南航天</span></div>
           <div><span>手机号</span><span>138****0587</span></div>
-          <div><span>当前版本</span><span>v1.2.0（原型）</span></div>
+          <div><span>当前版本</span><span>v1.2.2（原型）</span></div>
         </div>
       </section>
     </div>
