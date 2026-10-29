@@ -142,33 +142,6 @@
     }
     .sub .back { font-size: 22px; line-height: 1; margin-right: 10px; color: var(--ink); }
 
-    /* ===== 待办 / 已办：纯文字页签 ===== */
-    .tabs {
-      height: 42px;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: flex-end;
-      padding: 0 22px;
-      gap: 34px;
-    }
-    .tabs span {
-      position: relative;
-      padding: 0 0 9px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 22px;
-      cursor: pointer;
-    }
-    .tabs span.on { color: var(--b); font-weight: 700; }
-    .tabs span.on:after {
-      content: "";
-      position: absolute;
-      height: 2px;
-      background: var(--b);
-      border-radius: 2px;
-      left: 0; right: 0; bottom: 0;
-    }
     /* ===== 二层：四个业务模块 ===== */
     .types {
       height: 42px;
@@ -257,12 +230,73 @@
     .searchbar input::placeholder { color: #a9b2c0; }
     .searchbar .cancel { color: var(--b); font-size: 12px; }
     .empty { display: none; padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
-    .listnote { display: none; margin: 4px 16px 10px; color: #a0aabc; font-size: 11px; line-height: 1.6; }
+
+    /* ===== 巡检待领取筛选 ===== */
+    .inspection-filters {
+      margin: 12px 16px 2px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e7edf5;
+      border-radius: 12px;
+    }
+    .inspection-filters.hidden { display: none; }
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-row + .filter-row { margin-top: 10px; }
+    .filter-label {
+      flex: none;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .category-select {
+      flex: 1;
+      min-width: 0;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid #dfe6f0;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+    }
+    .period-note {
+      flex: 1;
+      color: #4f6f9d;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .time-slots {
+      display: flex;
+      flex: 1;
+      gap: 5px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .time-slots::-webkit-scrollbar { display: none; }
+    .time-slots span {
+      flex: none;
+      padding: 5px 7px;
+      border: 1px solid #e0e7f0;
+      border-radius: 6px;
+      background: #fff;
+      color: #6f7c90;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .time-slots span.on {
+      border-color: #b8d0fa;
+      background: #edf4ff;
+      color: var(--b);
+      font-weight: 700;
+    }
 
     /* ===== 待办卡片 ===== */
     .groups { padding-bottom: 8px; }
     .group { margin: 14px 16px; }
-    .group h3 { font-size: 14px; margin: 0 0 8px; }
     .item {
       background: #fff;
       border-radius: 12px;
@@ -280,18 +314,23 @@
       color: #da7138;
       font-size: 10px;
     }
-    .done .tag { background: #eaf8f2; color: #218c6f; }
-    .meta { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-    .item footer {
-      display: flex;
-      justify-content: space-between;
-      border-top: 1px solid #f0f2f6;
-      margin-top: 8px;
-      padding-top: 8px;
-      color: #9ca7b8;
-      font-size: 10px;
+    .fields {
+      display: grid;
+      gap: 5px;
+      margin-top: 9px;
     }
-    .item footer span:last-child { color: var(--b); }
+    .field {
+      display: flex;
+      gap: 8px;
+      color: #526176;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .field > span:first-child {
+      flex: none;
+      min-width: 54px;
+      color: var(--muted);
+    }
 
     /* ===== 我的 ===== */
     .profile {
@@ -383,10 +422,6 @@
           <input id="todoSearch" type="search" placeholder="搜索单号或事项名称" oninput="renderTodo()" />
           <button class="cancel" onclick="clearSearch()">取消</button>
         </div>
-        <nav class="tabs" id="todoTabs">
-          <span class="on" data-stage="pending">待办</span>
-          <span data-stage="done">已办</span>
-        </nav>
         <nav class="types" id="typeTabs">
           <span class="on" data-type="hazard">隐患</span>
           <span data-type="rectification">整改</span>
@@ -396,163 +431,168 @@
         <nav class="states" id="stateTabs">
           <span class="on" data-state="dispatch">待我派单</span>
         </nav>
+        <div class="inspection-filters hidden" id="inspectionFilters">
+          <div class="filter-row">
+            <span class="filter-label">巡检分类</span>
+            <select class="category-select" id="inspectionCategory" onchange="renderTodo()">
+              <option value="all">全部分类</option>
+              <option value="equipment">设备设施</option>
+              <option value="fire">消防安全</option>
+              <option value="chemical">危险化学品</option>
+            </select>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">时间范围</span>
+            <div class="time-slots" id="inspectionTimeSlots">
+              <span class="on" data-slot="all">全天</span>
+              <span data-slot="8-12">8~12点</span>
+              <span data-slot="12-20">12~20点</span>
+              <span data-slot="20-8">20~8点</span>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">计划日期</span>
+            <span class="period-note">默认显示计划开始日期≤当前日期≤计划结束日期的任务</span>
+          </div>
+        </div>
 
         <div class="groups" id="groups">
           <!-- 待办 · 隐患 -->
           <section class="group pending" data-type="hazard" data-state="dispatch">
-            <h3>隐患 · 待我派单</h3>
             <article class="item">
-              <div class="line"><b>待我派单 · 危险化学品库通风设备异常</b><span class="tag">待派单</span></div>
-              <div class="meta">HZ-20260921-018　提交人：王工</div>
-              <footer><span>截止今天 18:00</span><span>进入详情　›</span></footer>
+              <div class="line"><b>危险化学品库通风设备异常</b><span class="tag">待派单</span></div>
+              <div class="fields">
+                <div class="field"><span>上报人</span><strong>王工</strong></div>
+                <div class="field"><span>上报时间</span><strong>2026-10-29 09:20</strong></div>
+              </div>
             </article>
           </section>
 
           <!-- 待办 · 整改 -->
           <section class="group pending" data-type="rectification" data-state="dispatch">
-            <h3>整改 · 待我派单</h3>
             <article class="item">
-              <div class="line"><b>待我派单 · 仓库照明线路整改</b><span class="tag">待派单</span></div>
-              <div class="meta">ZG-20260921-015　来源：安全检查</div>
-              <footer><span>截止明天 12:00</span><span>进入派单　›</span></footer>
+              <div class="line"><b>仓库照明线路整改</b><span class="tag">待派单</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>王工</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-29 08:45</strong></div>
+              </div>
             </article>
           </section>
 
           <section class="group pending" data-type="rectification" data-state="accept">
-            <h3>整改 · 待我接单</h3>
             <article class="item">
-              <div class="line"><b>待我接单 · 消防通道堆放包装材料</b><span class="tag">待接单</span></div>
-              <div class="meta">ZG-20260920-006　责任部门：仓储部</div>
-              <footer><span>整改期限 09-23</span><span>进入详情　›</span></footer>
+              <div class="line"><b>消防通道堆放包装材料</b><span class="tag">待接单</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>赵海</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-28 16:10</strong></div>
+              </div>
             </article>
           </section>
 
           <section class="group pending" data-type="rectification" data-state="rectify">
-            <h3>整改 · 待我整改</h3>
             <article class="item">
-              <div class="line"><b>待我整改 · 配电室线路绝缘破损</b><span class="tag">整改中</span></div>
-              <div class="meta">ZG-20260919-009　整改执行人：林安全</div>
-              <footer><span>剩余 2 天</span><span>提交整改　›</span></footer>
+              <div class="line"><b>配电室线路绝缘破损</b><span class="tag">整改中</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>陈强</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-28 10:05</strong></div>
+              </div>
             </article>
           </section>
 
           <section class="group pending" data-type="rectification" data-state="verify">
-            <h3>整改 · 待我验收</h3>
             <article class="item">
-              <div class="line"><b>待我验收 · 机房配电柜防护缺失</b><span class="tag">待验收</span></div>
-              <div class="meta">ZG-20260919-011　整改执行人：陈强</div>
-              <footer><span>提交验收 2 小时前</span><span>进入验收　›</span></footer>
+              <div class="line"><b>机房配电柜防护缺失</b><span class="tag">待验收</span></div>
+              <div class="fields">
+                <div class="field"><span>创建人</span><strong>陈强</strong></div>
+                <div class="field"><span>创建时间</span><strong>2026-10-27 14:30</strong></div>
+              </div>
             </article>
           </section>
 
           <!-- 待办 · 巡检 -->
           <section class="group pending" data-type="inspect" data-state="claim">
-            <h3>巡检 · 待我领取</h3>
-            <article class="item">
-              <div class="line"><b>待我领取 · 动力站房月度巡检</b><span class="tag">待领取</span></div>
-              <div class="meta">XJ-0921-A　可领取范围：安全管理部</div>
-              <footer><span>计划开始 10:00</span><span>领取任务　›</span></footer>
+            <article class="item inspection-card" data-category="equipment" data-slot="8-12" data-plan-start="2026-10-28" data-plan-end="2026-10-30">
+              <div class="line"><b>动力站房月度巡检</b><span class="tag">待领取</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 09:30</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 11:00</strong></div>
+              </div>
+            </article>
+            <article class="item inspection-card" data-category="chemical" data-slot="20-8" data-plan-start="2026-10-29" data-plan-end="2026-10-30">
+              <div class="line"><b>夜间罐区安全巡检</b><span class="tag">待领取</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 21:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 22:30</strong></div>
+              </div>
+            </article>
+            <article class="item inspection-card" data-category="fire" data-slot="12-20" data-plan-start="2026-10-27" data-plan-end="2026-10-31">
+              <div class="line"><b>消防器材日常巡检</b><span class="tag">待领取</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 14:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 16:00</strong></div>
+              </div>
+            </article>
+            <article class="item inspection-card" data-category="equipment" data-slot="8-12" data-plan-start="2026-10-20" data-plan-end="2026-10-21">
+              <div class="line"><b>设备设施过期计划巡检</b><span class="tag">待领取</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-20 09:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-21 11:00</strong></div>
+              </div>
             </article>
           </section>
 
           <section class="group pending" data-type="inspect" data-state="inspect">
-            <h3>巡检 · 待我巡检</h3>
-            <article class="item">
-              <div class="line"><b>待我巡检 · 消防设施专项巡检</b><span class="tag">待巡检</span></div>
-              <div class="meta">XJ-20260921-032　巡检点 18 个</div>
-              <footer><span>允许提前 30 分钟</span><span>开始巡检　›</span></footer>
+            <article class="item inspection-card" data-category="fire" data-slot="8-12" data-plan-start="2026-10-28" data-plan-end="2026-10-30">
+              <div class="line"><b>消防设施专项巡检</b><span class="tag">待巡检</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 10:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 12:00</strong></div>
+              </div>
             </article>
-            <article class="item">
-              <div class="line"><b>待我巡检 · 危化品库巡检转办任务</b><span class="tag">待巡检</span></div>
-              <div class="meta">XJ-20260921-036　原巡检人：赵明</div>
-              <footer><span>结束时间 16:30</span><span>执行任务　›</span></footer>
+            <article class="item inspection-card" data-category="chemical" data-slot="20-8" data-plan-start="2026-10-29" data-plan-end="2026-10-30">
+              <div class="line"><b>危化品库巡检转办任务</b><span class="tag">待巡检</span></div>
+              <div class="fields">
+                <div class="field"><span>计划开始</span><strong>2026-10-29 22:00</strong></div>
+                <div class="field"><span>计划结束</span><strong>2026-10-29 23:00</strong></div>
+              </div>
             </article>
           </section>
 
           <!-- 待办 · 作业 -->
           <section class="group pending" data-type="work" data-state="approve">
-            <h3>作业 · 待我审批</h3>
             <article class="item">
-              <div class="line"><b>待我审批 · 一级动火作业票</b><span class="tag">待审批</span></div>
-              <div class="meta">ZYP-20260921-008　当前节点：安全负责人</div>
-              <footer><span>申请人：李伟</span><span>办理审批　›</span></footer>
+              <div class="line"><b>罐区管线维修动火作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>动火作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>一级</strong></div>
+                <div class="field"><span>申请人</span><strong>李伟</strong></div>
+              </div>
             </article>
           </section>
 
           <section class="group pending" data-type="work" data-state="gas">
-            <h3>作业 · 待气体检测</h3>
             <article class="item">
-              <div class="line"><b>待气体检测 · 有限空间作业</b><span class="tag">待气体检测</span></div>
-              <div class="meta">ZYP-20260921-009　检测位置：污水处理站</div>
-              <footer><span>检测有效期 2 小时</span><span>开始检测　›</span></footer>
+              <div class="line"><b>污水池清淤有限空间作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>受限空间作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>二级</strong></div>
+                <div class="field"><span>申请人</span><strong>周明</strong></div>
+              </div>
             </article>
           </section>
 
           <section class="group pending" data-type="work" data-state="perform">
-            <h3>作业 · 待我作业</h3>
             <article class="item">
-              <div class="line"><b>待我作业 · 高处作业</b><span class="tag">待我作业</span></div>
-              <div class="meta">ZYP-20260920-021　作业人员：林安全等 3 人</div>
-              <footer><span>有效期至 18:00</span><span>进入作业　›</span></footer>
+              <div class="line"><b>厂房屋面检修高处作业</b></div>
+              <div class="fields">
+                <div class="field"><span>作业类型</span><strong>高处作业</strong></div>
+                <div class="field"><span>作业级别</span><strong>二级</strong></div>
+                <div class="field"><span>申请人</span><strong>林安全</strong></div>
+              </div>
             </article>
           </section>
 
-          <!-- 已办 · 隐患 -->
-          <section class="group done" data-type="hazard">
-            <h3>隐患 · 已办</h3>
-            <article class="item">
-              <div class="line"><b>安全隐患派单并完成闭环</b><span class="tag">已闭环</span></div>
-              <div class="meta">HZ-20260918-004　完成：09-20 16:20</div>
-              <footer><span>上报 → 派单 → 整改 → 验收</span><span>查看流程　›</span></footer>
-            </article>
-          </section>
-
-          <!-- 已办 · 整改 -->
-          <section class="group done" data-type="rectification">
-            <h3>整改 · 已办</h3>
-            <article class="item">
-              <div class="line"><b>消防通道占用整改验收</b><span class="tag">已验收</span></div>
-              <div class="meta">ZG-20260918-004　完成：09-20 16:20</div>
-              <footer><span>派单 → 整改 → 验收</span><span>查看流程　›</span></footer>
-            </article>
-            <article class="item">
-              <div class="line"><b>配电室绝缘垫老化更换</b><span class="tag">已闭环</span></div>
-              <div class="meta">ZG-20260915-002　完成：09-18 09:40</div>
-              <footer><span>派单 → 整改 → 验收</span><span>查看流程　›</span></footer>
-            </article>
-          </section>
-
-          <!-- 已办 · 巡检 -->
-          <section class="group done" data-type="inspect">
-            <h3>巡检 · 已办</h3>
-            <article class="item">
-              <div class="line"><b>消防泵房巡检</b><span class="tag">已完成</span></div>
-              <div class="meta">XJ-20260920-014　完成：09-20 16:40</div>
-              <footer><span>领取 → 执行 → 提交</span><span>查看流程　›</span></footer>
-            </article>
-            <article class="item">
-              <div class="line"><b>罐区日常巡检</b><span class="tag">已完成</span></div>
-              <div class="meta">XJ-20260919-008　完成：09-19 15:10</div>
-              <footer><span>领取 → 执行 → 提交</span><span>查看流程　›</span></footer>
-            </article>
-          </section>
-
-          <!-- 已办 · 作业 -->
-          <section class="group done" data-type="work">
-            <h3>作业 · 已办</h3>
-            <article class="item">
-              <div class="line"><b>临时用电作业票</b><span class="tag">已审批</span></div>
-              <div class="meta">ZYP-20260919-003　完成：09-19 11:20</div>
-              <footer><span>申请 → 审批 → 归档</span><span>查看流程　›</span></footer>
-            </article>
-            <article class="item">
-              <div class="line"><b>动火作业票 · 备件库焊接</b><span class="tag">已归档</span></div>
-              <div class="meta">ZYP-20260916-012　完成：09-16 17:05</div>
-              <footer><span>申请 → 审批 → 气体检测 → 归档</span><span>查看流程　›</span></footer>
-            </article>
-          </section>
           <div class="empty" id="todoEmpty">未找到相关单据</div>
-          <div class="listnote" id="doneNote">已办默认展示近 6 个月的单据，每次加载 20 条，继续上滑加载更多。</div>
         </div>
       </section>
 
@@ -567,7 +607,7 @@
         <div class="plist">
           <div><span>所属组织</span><span>海南航天</span></div>
           <div><span>手机号</span><span>138****0587</span></div>
-          <div><span>当前版本</span><span>v1.1.0（原型）</span></div>
+          <div><span>当前版本</span><span>v1.2.0（原型）</span></div>
         </div>
       </section>
     </div>
@@ -581,7 +621,7 @@
 
   <div id="toast" class="toast"></div>
   <script>
-    var stage = "pending", type = "hazard", stateType = "dispatch";
+    var type = "hazard", stateType = "dispatch", inspectionSlot = "all";
     var stateMap = {
       hazard: [["dispatch", "待我派单"]],
       rectification: [
@@ -611,15 +651,10 @@
       document.querySelector(".scroll").scrollTop = 0;
     }
 
-    /* ---------- 待办：待办/已办 + 四个业务模块 + 模块内待办类型 ---------- */
+    /* ---------- 待办：四个业务模块 + 模块内状态页签 ---------- */
     function renderStateTabs() {
       var nav = document.getElementById("stateTabs");
       nav.innerHTML = "";
-      if (stage === "done") {
-        nav.classList.add("hidden");
-        return;
-      }
-      nav.classList.remove("hidden");
       var states = stateMap[type];
       var currentExists = states.some(function (item) {
         return item[0] === stateType;
@@ -637,24 +672,49 @@
         };
         nav.appendChild(tab);
       });
+      renderInspectionFilters();
+    }
+
+    function renderInspectionFilters() {
+      var filters = document.getElementById("inspectionFilters");
+      filters.classList.toggle("hidden", !(type === "inspect" && stateType === "claim"));
+    }
+
+    function todayText() {
+      var now = new Date();
+      var month = String(now.getMonth() + 1).padStart(2, "0");
+      var day = String(now.getDate()).padStart(2, "0");
+      return now.getFullYear() + "-" + month + "-" + day;
+    }
+
+    function inInspectionRange(item, today) {
+      var planStart = item.dataset.planStart;
+      var planEnd = item.dataset.planEnd;
+      return (!planStart || planStart <= today) && (!planEnd || today <= planEnd);
     }
 
     function renderTodo() {
       var input = document.getElementById("todoSearch");
       var keyword = input ? input.value.trim().toLowerCase() : "";
       var searching = keyword.length > 0;
+      var category = document.getElementById("inspectionCategory").value;
+      var today = todayText();
       var visible = 0;
       document.querySelectorAll(".group").forEach(function (g) {
-        var byStage = g.classList.contains(stage);
         var byType = searching || g.dataset.type === type;
-        var byState = searching || stage === "done" || g.dataset.state === stateType;
-        if (!byStage || !byType || !byState) {
+        var byState = searching || g.dataset.state === stateType;
+        if (!byType || !byState) {
           g.style.display = "none";
           return;
         }
         var groupHits = 0;
         g.querySelectorAll(".item").forEach(function (item) {
           var hit = !keyword || item.textContent.toLowerCase().indexOf(keyword) >= 0;
+          if (hit && g.dataset.type === "inspect" && g.dataset.state === "claim") {
+            var categoryHit = category === "all" || item.dataset.category === category;
+            var slotHit = inspectionSlot === "all" || item.dataset.slot === inspectionSlot;
+            hit = categoryHit && slotHit && inInspectionRange(item, today);
+          }
           item.style.display = hit ? "block" : "none";
           if (hit) groupHits = groupHits + 1;
         });
@@ -662,7 +722,6 @@
         visible += groupHits;
       });
       document.getElementById("todoEmpty").style.display = visible ? "none" : "block";
-      document.getElementById("doneNote").style.display = stage === "done" && !keyword ? "block" : "none";
     }
     function toggleSearch() {
       var bar = document.getElementById("searchbar");
@@ -678,17 +737,6 @@
       document.getElementById("searchbar").classList.remove("on");
       renderTodo();
     }
-    document.querySelectorAll("#todoTabs span").forEach(function (x) {
-      x.onclick = function () {
-        document.querySelectorAll("#todoTabs span").forEach(function (y) {
-          y.classList.remove("on");
-        });
-        x.classList.add("on");
-        stage = x.dataset.stage;
-        renderStateTabs();
-        renderTodo();
-      };
-    });
     document.querySelectorAll("#typeTabs span").forEach(function (x) {
       x.onclick = function () {
         document.querySelectorAll("#typeTabs span").forEach(function (y) {
@@ -698,6 +746,16 @@
         type = x.dataset.type;
         stateType = stateMap[type][0][0];
         renderStateTabs();
+        renderTodo();
+      };
+    });
+    document.querySelectorAll("#inspectionTimeSlots span").forEach(function (x) {
+      x.onclick = function () {
+        document.querySelectorAll("#inspectionTimeSlots span").forEach(function (y) {
+          y.classList.remove("on");
+        });
+        x.classList.add("on");
+        inspectionSlot = x.dataset.slot;
         renderTodo();
       };
     });
