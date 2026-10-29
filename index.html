@@ -384,7 +384,7 @@
         </div>
         <div class="searchbar" id="searchbar">
           <i class="ri-search-line"></i>
-          <input id="todoSearch" type="search" placeholder="搜索单号或事项名称" oninput="renderTodo()" />
+          <input id="todoSearch" type="search" placeholder="搜索当前模块与状态下的标题" oninput="renderTodo()" />
           <button class="cancel" onclick="clearSearch()">取消</button>
         </div>
         <nav class="types" id="typeTabs">
@@ -568,7 +568,7 @@
         <div class="plist">
           <div><span>所属组织</span><span>海南航天</span></div>
           <div><span>手机号</span><span>138****0587</span></div>
-          <div><span>当前版本</span><span>v1.2.2（原型）</span></div>
+          <div><span>当前版本</span><span>v1.2.3（原型）</span></div>
         </div>
       </section>
     </div>
@@ -657,20 +657,20 @@
     function renderTodo() {
       var input = document.getElementById("todoSearch");
       var keyword = input ? input.value.trim().toLowerCase() : "";
-      var searching = keyword.length > 0;
       var category = document.getElementById("inspectionCategory").value;
       var today = todayText();
       var visible = 0;
       document.querySelectorAll(".group").forEach(function (g) {
-        var byType = searching || g.dataset.type === type;
-        var byState = searching || g.dataset.state === stateType;
+        var byType = g.dataset.type === type;
+        var byState = g.dataset.state === stateType;
         if (!byType || !byState) {
           g.style.display = "none";
           return;
         }
         var groupHits = 0;
         g.querySelectorAll(".item").forEach(function (item) {
-          var hit = !keyword || item.textContent.toLowerCase().indexOf(keyword) >= 0;
+          var title = item.querySelector(".line b");
+          var hit = !keyword || (title && title.textContent.toLowerCase().indexOf(keyword) >= 0);
           if (hit && g.dataset.type === "inspect" && g.dataset.state === "claim") {
             var categoryHit = category === "all" || item.dataset.category === category;
             var slotHit = inspectionSlot === "all" || item.dataset.slot === inspectionSlot;
